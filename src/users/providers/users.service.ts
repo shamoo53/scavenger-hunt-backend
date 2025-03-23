@@ -18,8 +18,8 @@ export class UsersService {
 
   //GET ALL USERS
   async findAll(
-    page: number = 1,
-    limit: number = 10,
+    page: number,
+    limit: number,
     search?: string,
   ): Promise<{ users: UserResponseDto[]; total: number; message: string }> {
     const query = this.userRepository.createQueryBuilder('user');
@@ -39,7 +39,7 @@ export class UsersService {
       .getManyAndCount();
 
     return {
-      message: 'Users retrieved successfully',
+      message: total > 0 ? 'Users retrieved successfully' : 'No users found',
       total,
       users: users.map((user) =>
         plainToInstance(UserResponseDto, user, {
