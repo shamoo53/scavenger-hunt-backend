@@ -9,6 +9,7 @@ import {
   Req,
   UsePipes,
   ValidationPipe,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './providers/users.service';
 import { CreateUserDto, UpdateUserDto } from './users.dto';
@@ -22,8 +23,12 @@ export class UsersController {
 
   // @UseGuards(AuthGuard, AdminGuard)
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('search') search?: string,
+  ) {
+    return this.usersService.findAll(Number(page), Number(limit), search);
   }
 
   @Get(':id')
