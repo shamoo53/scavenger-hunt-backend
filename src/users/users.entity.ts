@@ -4,9 +4,11 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
+import { UserProfile } from './user-profile.entity';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -39,6 +41,12 @@ export class User {
     nullable: false,
   })
   password: string;
+
+  @OneToOne(() => UserProfile, (profile) => profile.user, {
+    cascade: true,
+    eager: true,
+  })
+  profile: UserProfile;
 
   @CreateDateColumn()
   createdAt: Date;
