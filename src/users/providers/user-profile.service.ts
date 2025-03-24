@@ -59,6 +59,8 @@ export class UserProfileService {
       relations: ['profile'],
     });
 
+    console.log('Found user:', user);
+
     if (!user || !user.profile) {
       throw new NotFoundException('Profile not found');
     }

@@ -7,6 +7,9 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { StaticModule } from './common/static/static.module';
+import { UserProfile } from './users/user-profile.entity';
+import { User } from './users/users.entity';
 
 @Module({
   imports: [
