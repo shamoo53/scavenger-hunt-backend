@@ -86,4 +86,7 @@ export class UserResponseDto {
 
   @Exclude()
   password: string;
+
+  @Expose()
+  roles: any[];
 }
