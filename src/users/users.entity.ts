@@ -53,4 +53,5 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+  roles: any[];
 }

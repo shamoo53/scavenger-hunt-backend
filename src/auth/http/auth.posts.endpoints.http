@@ -5,3 +5,25 @@ Content-Type: application/json
     "email": "faladeysuuf54@gmail.com",
     "password": "223232423"
 }
+
+# @name register
+POST http://localhost:3001/auth/sign-up
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "faladeysuuf54@gmail.com",
+  "password": "223232423"
+}
+
+# @name protectedRoute
+GET http://localhost:3001/auth/protected
+Authorization: Bearer token
+
+# @name refreshToken
+POST http://localhost:3001/auth/refresh
+Content-Type: application/json
+{
+  "refreshToken": "refresh token"
+}
