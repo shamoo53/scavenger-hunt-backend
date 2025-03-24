@@ -47,6 +47,7 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
+
   @Column({ unique: true, nullable: true })
   walletAddress: string;
 
@@ -55,4 +56,7 @@ export class User {
 
   @Column({ type: 'timestamp', nullable: true })
   loggedInAt: Date;
+
+  roles: any[];
+
 }
