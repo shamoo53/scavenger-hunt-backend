@@ -164,6 +164,27 @@ export class UsersService {
     return this.userRepository.save(newUser);
   }
    */
+
+
+
+  async findOrCreateGoogleUser({ email, firstName, lastName, password }) {
+    let user = await this.usersRepository.findOne({ where: { email } });
+
+    if (!user) {
+      user = this.usersRepository.create({
+        email,
+        firstName,
+        lastName,
+        password,
+        walletAddress: null, 
+        loggedInAt: new Date(), 
+      });
+
+      await this.usersRepository.save(user);
+    }
+
+    return user;
+  }
 }
 
 
