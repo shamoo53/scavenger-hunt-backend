@@ -7,11 +7,10 @@ import { UsersService } from '../../users/providers/users.service';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private readonly usersService: UsersService) {
-    
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3001/auth/google/callback',
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
       scope: ['email', 'profile'],
     });
   }
@@ -22,9 +21,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
-    console.log('✅ Google OAuth Callback Received');
-    console.log('🌍 Profile:', profile);
-
+  
     const { name, emails } = profile;
 
     // Extract required fields
@@ -33,9 +30,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const lastName = name?.familyName || '';
 
     const password = 'google-auth';
-
-    console.log(`👤 User Info: ${firstName} ${lastName} (${email})`);
-
     // Create or find user in database
     const user = await this.usersService.findOrCreateGoogleUser({
       email,
@@ -43,8 +37,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       lastName,
       password,
     });
-
-    console.log('🔄 User created or found:', user);
     done(null, user);
   }
 }
