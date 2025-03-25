@@ -8,6 +8,10 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  Query,
+  Req,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -19,10 +23,17 @@ import { User } from './users.entity';
 import { storageConfig } from '../common/config/storage.config';
 import { ProfileResponseDto } from './dtos/profile-response.dto';
 import { plainToClass } from 'class-transformer';
+import { UsersService } from './providers/users.service';
+import { CreateUserDto } from './users.dto';
+import { UpdateUserDto } from './users.dto';
+import { Delete } from '@nestjs/common';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userProfileService: UserProfileService) {}
+  constructor(
+    private readonly userProfileService: UserProfileService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
@@ -63,8 +74,34 @@ export class UsersController {
       currentUser?.id,
     );
     return plainToClass(ProfileResponseDto, profile, { excludeExtraneousValues: true });
-    }
-  // @UseGuards(AuthGuard, AdminGuard)
+  }
+
+  @Get('profile/me')
+  async getProfile(@Req() req) {
+    // Temporary fallback userId for testing purposes (to be removed once AuthGuard is implemented)
+    const userId = req.user?.id || 'b7f89c2d-3e7a-4d12-a4f5-8c6d7e9b1a23';
+
+    return this.usersService.findById(userId);
+  }
+
+  @Put('profile/me')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  async updateProfile(@Req() req, @Body() updateUserDto: UpdateUserDto) {
+    // Temporary fallback userId for testing purposes (to be removed once AuthGuard is implemented)
+    const userId = req.user?.id || 'b7f89c2d-3e7a-4d12-a4f5-8c6d7e9b1a23';
+    return this.usersService.update(userId, updateUserDto);
+  }
+
+  @Get('wallet/:walletAddress')
+  async findByWalletAddress(@Param('walletAddress') address: string) {
+    return this.usersService.findByWalletAddress(address);
+  }
+
+  @Post('wallet/:walletAddress')
+  async createFromWallet(@Param('walletAddress') address: string) {
+    return this.usersService.createFromWallet(address);
+  }
+
   @Get()
   findAll(
     @Query('page') page: string = '1',
@@ -97,33 +134,5 @@ export class UsersController {
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.usersService.delete(id);
-  }
-
-  // @UseGuards(AuthGuard)
-  @Get('profile/me')
-  async getProfile(@Req() req) {
-    // Temporary fallback userId for testing purposes (to be removed once AuthGuard is implemented)
-    const userId = req.user?.id || 'b7f89c2d-3e7a-4d12-a4f5-8c6d7e9b1a23';
-
-    return this.usersService.findById(userId);
-  }
-
-  // @UseGuards(AuthGuard)
-  @Put('profile/me')
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  async updateProfile(@Req() req, @Body() updateUserDto: UpdateUserDto) {
-    // Temporary fallback userId for testing purposes (to be removed once AuthGuard is implemented)
-    const userId = req.user?.id || 'b7f89c2d-3e7a-4d12-a4f5-8c6d7e9b1a23';
-    return this.usersService.update(userId, updateUserDto);
-  }
-
-  @Get('wallet/:walletAddress')
-  async findByWalletAddress(@Param('walletAddress') address: string) {
-    return this.usersService.findByWalletAddress(address);
-  }
-
-  @Post('wallet/:walletAddress')
-  async createFromWallet(@Param('walletAddress') address: string) {
-    return this.usersService.createFromWallet(address);
   }
 }

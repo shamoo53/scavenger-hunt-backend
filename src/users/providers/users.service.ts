@@ -1,4 +1,3 @@
-
 import {
   BadRequestException,
   Injectable,
@@ -9,8 +8,7 @@ import { User } from '../users.entity';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../users.dto';
 import { plainToInstance } from 'class-transformer';
 import { Repository } from 'typeorm';
-
-import { User } from '../users.entity'; 
+ 
 import { Inject, forwardRef } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
 
@@ -19,11 +17,9 @@ import { UserProfileService } from './user-profile.service';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-
     private usersRepository: Repository<User>,
     @Inject(forwardRef(() => UserProfileService))
     private userProfileService: UserProfileService,
-
   ) {}
 
   //GET ALL USERS
@@ -32,7 +28,7 @@ export class UsersService {
     limit: number,
     search?: string,
   ): Promise<{ users: UserResponseDto[]; total: number; message: string }> {
-    const query = this.userRepository.createQueryBuilder('user');
+    const query = this.usersRepository.createQueryBuilder('user');
 
     if (search) {
       query.where(
@@ -59,20 +55,24 @@ export class UsersService {
     };
   }
 
+  async create(userData: CreateUserDto): Promise<UserResponseDto> {
+    const existingUser = await this.usersRepository.findOne({
+      where: { email: userData.email },
+    });
+    if (existingUser)
+      throw new BadRequestException('A user with this email already exists');
 
-  async create(userData: Partial<User>): Promise<User> {
-    const user = this.usersRepository.create(userData);
-    await this.usersRepository.save(user);
-    
-    await this.userProfileService.createProfile(user.id, {});
-    
-    return user;
+    const newUser = this.usersRepository.create(userData);
+    const savedUser = await this.usersRepository.save(newUser);
+
+    return plainToInstance(UserResponseDto, savedUser, {
+      excludeExtraneousValues: true,
+    });
   }
-}
 
   //GET USER BY ID
   async findById(id: string): Promise<UserResponseDto> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
 
     return plainToInstance(UserResponseDto, user, {
@@ -82,26 +82,10 @@ export class UsersService {
 
   //GET USER BY EMAIL
   async findByEmail(email: string): Promise<UserResponseDto> {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({ where: { email } });
     if (!user) throw new NotFoundException('No user found with this email');
 
     return plainToInstance(UserResponseDto, user, {
-      excludeExtraneousValues: true,
-    });
-  }
-
-  //CREATE NEW USER
-  async create(userData: CreateUserDto): Promise<UserResponseDto> {
-    const existingUser = await this.userRepository.findOne({
-      where: { email: userData.email },
-    });
-    if (existingUser)
-      throw new BadRequestException('A user with this email already exists');
-
-    const newUser = this.userRepository.create(userData);
-    const savedUser = await this.userRepository.save(newUser);
-
-    return plainToInstance(UserResponseDto, savedUser, {
       excludeExtraneousValues: true,
     });
   }
@@ -112,7 +96,7 @@ export class UsersService {
 
     Object.assign(user, userData);
 
-    const savedUser = await this.userRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
     return plainToInstance(UserResponseDto, savedUser, {
       excludeExtraneousValues: true,
     });
@@ -121,19 +105,19 @@ export class UsersService {
   //DELETE A PARTICULAR USER
   async delete(id: string): Promise<void> {
     const user = await this.findById(id);
-    await this.userRepository.softRemove(user);
+    await this.usersRepository.softRemove(user);
   }
 
   //UPDATE LASTLY LOGGED IN TIME
   async updateLastLogin(id: string): Promise<void> {
     await this.findById(id); //contains error handling
 
-    await this.userRepository.update(id, { loggedInAt: new Date() });
+    await this.usersRepository.update(id, { loggedInAt: new Date() });
   }
 
   //FIND BY WALLET ADDRESS
   async findByWalletAddress(address: string): Promise<UserResponseDto> {
-    const user = await this.userRepository.findOne({
+    const user = await this.usersRepository.findOne({
       where: { walletAddress: address },
     });
     if (!user) throw new NotFoundException('User not found');
@@ -145,16 +129,16 @@ export class UsersService {
 
   //CREATE USER FROM WALLET
   async createFromWallet(address: string): Promise<UserResponseDto> {
-    const existingUser = await this.userRepository.findOne({
+    const existingUser = await this.usersRepository.findOne({
       where: { walletAddress: address },
     });
     if (existingUser) return existingUser; //prefare returning user instead of error
 
     //This would need firstname, lastname, email, password since nullable is false for all of them.
     //So currently this would return an error, I'll get your thoughts after the first PR review and fix
-    const newUser = this.userRepository.create({ walletAddress: address });
+    const newUser = this.usersRepository.create({ walletAddress: address });
 
-    const savedUser = await this.userRepository.save(newUser);
+    const savedUser = await this.usersRepository.save(newUser);
     return plainToInstance(UserResponseDto, savedUser, {
       excludeExtraneousValues: true,
     });
