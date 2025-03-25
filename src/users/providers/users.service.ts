@@ -45,7 +45,7 @@ export class UsersService {
       .getManyAndCount();
 
     return {
-      message: total > 0 ? 'Users retrieved successfully' : 'No users found',
+      message: total > 0 ? 'Users retrieved successfully!' : 'No users found',
       total,
       users: users.map((user) =>
         plainToInstance(UserResponseDto, user, {
