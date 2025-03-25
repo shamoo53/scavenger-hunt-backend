@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -53,5 +54,17 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+
+  @Column({ unique: true, nullable: true })
+  walletAddress: string;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  loggedInAt: Date;
+
   roles: any[];
+
 }
