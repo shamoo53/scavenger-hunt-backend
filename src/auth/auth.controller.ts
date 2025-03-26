@@ -1,11 +1,15 @@
-
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './providers/auth.service';
+import { Request } from 'express';
 import { SignInDto } from './dtos/signIn.dto';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { Public } from './guards/decorators/public.decorator';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from './auth.service';
+import { RateLimitGuard } from './guards/rate-limit.guard';
+import { RegisterDTO } from './dtos/register.dto';
+import { LoginDTO } from './dtos/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -29,7 +33,24 @@ export class AuthController {
     return this.authService.refreshToken(refreshTokenDto.refreshToken);
   }
 
-  @Get('protected')
+  @Post('register')
+  async register(@Body() registerDto: RegisterDTO) {
+    return this.authService.register(registerDto);
+  }
+
+  @UseGuards(RateLimitGuard)
+  @Post('login')
+  async login(@Body() loginDto: LoginDTO) {
+    return this.authService.login(loginDto);
+  }
+
+  @Get('me')
+  async me(@Req() req: Request) {
+    return this.authService.getProfile(req.user);
+  }
+
+  // for testing purposes to see whether the protected works
+ @Get('protected')
   getProtectedData() {
     return { message: 'This is protected data!' };
   }
@@ -49,3 +70,5 @@ export class AuthController {
     return this.authService.googleLogin(req.user);
   }
 }
+
+ 
