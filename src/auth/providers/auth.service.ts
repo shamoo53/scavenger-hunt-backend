@@ -1,3 +1,4 @@
+
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignInDto } from '../dtos/signIn.dto';
 import { TokenService } from './token.service';
@@ -14,14 +15,12 @@ export class AuthService {
   ) {}
 
   public async signIn(signInDto: SignInDto) {
-    // Find user by email/username
     const user = await this.usersService.findByEmail(signInDto.email);
     
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
     
-    // Verify password using your existing HashingProvider
     const isPasswordValid = await this.hashingProvider.comparePassword(
       signInDto.password, 
       user.password
@@ -31,60 +30,50 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
     
-    // Generate tokens
     const payload = {
       sub: user.id,
       email: user.email,
       roles: user.roles || [],
     };
     
-    // Return tokens using the TokenService
     return this.tokenService.generateTokens(payload);
   }
 
-async signUp(createUserDto: CreateUserDto) {
-  // Check if user already exists
-  const existingUser = await this.usersService.findByEmail(createUserDto.email);
-  if (existingUser) {
-    throw new ConflictException('Email already exists');
+  public async signUp(createUserDto: CreateUserDto) {
+    const existingUser = await this.usersService.findByEmail(createUserDto.email);
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+    
+    const hashedPassword = await this.hashingProvider.hashPassword(
+      createUserDto.password
+    );
+    
+    const user = await this.usersService.create({
+      firstName: createUserDto.firstName, 
+      lastName: createUserDto.lastName,
+      email: createUserDto.email,
+      password: hashedPassword
+    });
+    
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      roles: user.roles || [],
+    };
+    
+    return this.tokenService.generateTokens(payload);
   }
-  
-  // Hash the password
-  const hashedPassword = await this.hashingProvider.hashPassword(
-    createUserDto.password
-  );
-  
-  // Create the user - map name to firstName
-  const user = await this.usersService.create({
-    firstName: createUserDto.firstName, 
-    lastName: createUserDto.lastName,
-    email: createUserDto.email,
-    password: hashedPassword
-  });
-  
-  // Generate tokens
-  const payload = {
-    sub: user.id,
-    email: user.email,
-    roles: user.roles || [],
-  };
-  
-  return this.tokenService.generateTokens(payload);
-}
-  
-  async refreshToken(refreshToken: string) {
+
+  public async refreshToken(refreshToken: string) {
     try {
-      // Verify the refresh token
       const payload = this.tokenService.verifyRefreshToken(refreshToken);
       
-      // Check if user still exists
       const user = await this.usersService.findById(payload.sub);
-      
       if (!user) {
         throw new UnauthorizedException('User no longer exists');
       }
       
-      // Generate new tokens
       const newPayload = {
         sub: user.id,
         email: user.email,
@@ -96,12 +85,40 @@ async signUp(createUserDto: CreateUserDto) {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
-  
-  async validateToken(token: string) {
+
+  public async validateToken(token: string) {
     try {
       return this.tokenService.verifyAccessToken(token);
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
+  }
+
+
+  public async googleLogin(userData: any) {
+    if (!userData) {
+      throw new UnauthorizedException('No user data received from Google');
+    }
+
+    const { email, firstName, lastName } = userData;
+
+    let user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Create a new user if they don’t exist
+      user = await this.usersService.create({
+        firstName: firstName || '',
+        lastName: lastName || '',
+        email,
+        password: '',
+      });
+    }
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      roles: user.roles || [],
+    };
+
+    return this.tokenService.generateTokens(payload);
   }
 }
