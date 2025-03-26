@@ -1,19 +1,18 @@
 import { Body, Controller, Post, Get, UseGuards, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { SignInDto } from './dtos/signIn.dto';
-import { RefreshTokenDto } from './dtos/refresh-token.dto'; 
-import { Public } from './guards/decorators/public.decorator'; 
+import { RefreshTokenDto } from './dtos/refresh-token.dto';
+import { Public } from './guards/decorators/public.decorator';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { AuthService } from './auth.service';
+import { AuthService } from './providers/auth.service';
 import { RateLimitGuard } from './guards/rate-limit.guard';
-import { RegisterDTO } from './dtos/register.dto';
-import { LoginDTO } from './dtos/login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Public()
+  //   @Public()
+  @UseGuards(RateLimitGuard)
   @Post('sign-in')
   public signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto);
@@ -31,20 +30,9 @@ export class AuthController {
     return this.authService.refreshToken(refreshTokenDto.refreshToken);
   }
 
-  @Post('register')
-  async register(@Body() registerDto: RegisterDTO) {
-    return this.authService.register(registerDto);
-  }
-
-  @UseGuards(RateLimitGuard)
-  @Post('login')
-  async login(@Body() loginDto: LoginDTO) {
-    return this.authService.login(loginDto);
-  }
-
   @Get('me')
   async me(@Req() req: Request) {
-    return this.authService.getProfile(req.user);
+    return this.authService.getProfile(req);
   }
 
   // for testing purposes to see whether the protected works
