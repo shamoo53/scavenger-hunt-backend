@@ -1,5 +1,8 @@
-
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { SignInDto } from '../dtos/signIn.dto';
 import { TokenService } from './token.service';
 import { UsersService } from '../../users/providers/users.service';
@@ -16,70 +19,82 @@ export class AuthService {
 
   public async signIn(signInDto: SignInDto) {
     const user = await this.usersService.findByEmail(signInDto.email);
-    
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
+
+    // Verify password using your existing HashingProvider
     const isPasswordValid = await this.hashingProvider.comparePassword(
-      signInDto.password, 
-      user.password
+      signInDto.password,
+      user.password,
     );
-    
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
+
+    // Generate tokens
     const payload = {
       sub: user.id,
       email: user.email,
       roles: user.roles || [],
     };
-    
+
+    // Return tokens using the TokenService
     return this.tokenService.generateTokens(payload);
   }
 
-  public async signUp(createUserDto: CreateUserDto) {
-    const existingUser = await this.usersService.findByEmail(createUserDto.email);
+  async signUp(createUserDto: CreateUserDto) {
+    // Check if user already exists
+    const existingUser = await this.usersService.findByEmail(
+      createUserDto.email,
+    );
     if (existingUser) {
       throw new ConflictException('Email already exists');
     }
-    
+
+    // Hash the password
     const hashedPassword = await this.hashingProvider.hashPassword(
-      createUserDto.password
+      createUserDto.password,
     );
-    
+
+    // Create the user - map name to firstName
     const user = await this.usersService.create({
-      firstName: createUserDto.firstName, 
+      firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
       email: createUserDto.email,
-      password: hashedPassword
+      password: hashedPassword,
     });
-    
+
+    // Generate tokens
     const payload = {
       sub: user.id,
       email: user.email,
       roles: user.roles || [],
     };
-    
+
     return this.tokenService.generateTokens(payload);
   }
 
-  public async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string) {
     try {
       const payload = this.tokenService.verifyRefreshToken(refreshToken);
-      
+
+      // Check if user still exists
       const user = await this.usersService.findById(payload.sub);
+
       if (!user) {
         throw new UnauthorizedException('User no longer exists');
       }
-      
+
+      // Generate new tokens
       const newPayload = {
         sub: user.id,
         email: user.email,
         roles: user.roles || [],
       };
-      
+
       return this.tokenService.generateTokens(newPayload);
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
@@ -94,6 +109,9 @@ export class AuthService {
     }
   }
 
+  async getProfile(user: any) {
+    return user;
+  }
 
   public async googleLogin(userData: any) {
     if (!userData) {
