@@ -10,6 +10,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { HashingProvider } from './providers/hashing.provider';
 import { BcryptProvider } from './providers/bcrypt.provider';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 
 @Module({
@@ -25,7 +26,7 @@ import { BcryptProvider } from './providers/bcrypt.provider';
       }),
     })],
   controllers: [AuthController],
-  providers: [AuthService, TokenService, JwtStrategy, JwtAuthGuard,
+  providers: [AuthService, GoogleStrategy, TokenService, JwtStrategy, JwtAuthGuard,
       // Add the HashingProvider (abstract class)
     {
       provide: HashingProvider,

@@ -41,7 +41,7 @@ import { User } from './users/users.entity';
   ],
   controllers: [AppController],
   providers: [AppService,
-  // Apply JWT authentication globally
+
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

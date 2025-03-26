@@ -18,7 +18,6 @@ export class AuthService {
   ) {}
 
   public async signIn(signInDto: SignInDto) {
-    // Find user by email/username
     const user = await this.usersService.findByEmail(signInDto.email);
 
     if (!user) {
@@ -80,7 +79,6 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     try {
-      // Verify the refresh token
       const payload = this.tokenService.verifyRefreshToken(refreshToken);
 
       // Check if user still exists
@@ -103,7 +101,7 @@ export class AuthService {
     }
   }
 
-  async validateToken(token: string) {
+  public async validateToken(token: string) {
     try {
       return this.tokenService.verifyAccessToken(token);
     } catch (error) {
@@ -113,5 +111,32 @@ export class AuthService {
 
   async getProfile(user: any) {
     return user;
+  }
+
+  public async googleLogin(userData: any) {
+    if (!userData) {
+      throw new UnauthorizedException('No user data received from Google');
+    }
+
+    const { email, firstName, lastName } = userData;
+
+    let user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Create a new user if they don’t exist
+      user = await this.usersService.create({
+        firstName: firstName || '',
+        lastName: lastName || '',
+        email,
+        password: '',
+      });
+    }
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      roles: user.roles || [],
+    };
+
+    return this.tokenService.generateTokens(payload);
   }
 }

@@ -1,10 +1,11 @@
-import { Body, Controller, Post, Get, UseGuards, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { AuthService } from './providers/auth.service';
 import { Request } from 'express';
 import { SignInDto } from './dtos/signIn.dto';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { Public } from './guards/decorators/public.decorator';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { AuthService } from './providers/auth.service';
+import { AuthGuard } from '@nestjs/passport';
 import { RateLimitGuard } from './guards/rate-limit.guard';
 
 @Controller('auth')
@@ -39,5 +40,17 @@ export class AuthController {
   @Get('protected')
   getProtectedData() {
     return { message: 'This is protected data!' };
+  }
+
+  @Public()
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req) {}
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req) {
+    return this.authService.googleLogin(req.user);
   }
 }
