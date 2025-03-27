@@ -10,6 +10,7 @@ import { UsersService } from './providers/users.service';
 
 @Module({
   imports: [
+    forwardRef(() => AuthModule),
     TypeOrmModule.forFeature([User, UserProfile]),
     MulterModule.register({
       dest: './uploads',

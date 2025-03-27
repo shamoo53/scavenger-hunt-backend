@@ -67,4 +67,14 @@ export class User {
 
   roles: any[];
 
+  @Column({
+    type: 'varchar',
+    length: 96,
+    nullable: true,
+  })
+  resetPasswordCode?: string;
+
+  @Column({nullable: true})
+  tokenExpires?: Date
+
 }

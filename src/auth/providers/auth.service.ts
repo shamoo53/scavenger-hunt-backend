@@ -1,6 +1,9 @@
 import {
+  BadRequestException,
   ConflictException,
+  HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignInDto } from '../dtos/signIn.dto';
@@ -8,18 +11,29 @@ import { TokenService } from './token.service';
 import { UsersService } from '../../users/providers/users.service';
 import { HashingProvider } from './hashing.provider';
 import { CreateUserDto } from '../dtos/create-user.dto';
-
+import {
+  ForgotPasswordDto,
+  RestPasswordDto,
+} from '../dtos/forgot-password.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/users.entity';
+import { Repository } from 'typeorm';
+import { emailverification } from 'src/Email/verification';
+import { generateUniqueKey } from './uniqueKey.provider';
 @Injectable()
 export class AuthService {
   constructor(
     private tokenService: TokenService,
     private usersService: UsersService,
     private hashingProvider: HashingProvider,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   public async signIn(signInDto: SignInDto) {
-    const user = await this.usersService.findByEmail(signInDto.email);
-
+    const user = await this.userRepository.findOne({
+      where: { email: signInDto.email },
+    });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -47,9 +61,9 @@ export class AuthService {
 
   async signUp(createUserDto: CreateUserDto) {
     // Check if user already exists
-    const existingUser = await this.usersService.findByEmail(
-      createUserDto.email,
-    );
+    const existingUser = await this.userRepository.findOne({
+      where: { email: createUserDto.email },
+    });
     if (existingUser) {
       throw new ConflictException('Email already exists');
     }
@@ -138,5 +152,85 @@ export class AuthService {
     };
 
     return this.tokenService.generateTokens(payload);
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<any> {
+    try {
+      const email = dto.email;
+      const user = await this.userRepository.findOne({ where: { email } });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const resetCode = generateUniqueKey(6);
+      user.resetPasswordCode = resetCode;
+      user.tokenExpires = new Date(Date.now() + 15 * 60 * 1000);
+
+      await this.userRepository.save(user);
+      await emailverification({
+        name: user.firstName || email.split('@')[0],
+        email: user.email,
+        code: resetCode,
+        type: 'Reset Token',
+      });
+
+      return {
+        success: true,
+        code: HttpStatus.OK,
+        message: 'Reset code sent to your email',
+      };
+    } catch (error) {
+      console.error('Forgot Password Error:', error);
+      throw error;
+    }
+  }
+
+  async resetPassword(dto: RestPasswordDto): Promise<any> {
+    try {
+      if (!dto.token || dto.token == ' ') {
+        throw new BadRequestException('A valid token is required');
+      }
+      const user = await this.userRepository.findOne({
+        where: { resetPasswordCode: dto.token },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+
+      if (user.tokenExpires && user.tokenExpires < new Date()) {
+        throw new BadRequestException(
+          'Reset token has expired. Please request a new one.',
+        );
+      }
+
+      if (!dto.newpassword) {
+        throw new BadRequestException('New password is required');
+      }
+
+      const isSameAsCurrent = await this.hashingProvider.comparePassword(
+        dto.newpassword,
+        user.password,
+      );
+      if (isSameAsCurrent) {
+        throw new BadRequestException(
+          'You cannot reset your password to the current one',
+        );
+      }
+
+      user.password = await this.hashingProvider.hashPassword(dto.newpassword);
+      user.resetPasswordCode = null;
+
+      await this.userRepository.save(user);
+
+      return {
+        success: true,
+        code: HttpStatus.OK,
+        message: 'Password reset successful',
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
