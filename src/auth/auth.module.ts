@@ -11,10 +11,14 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { HashingProvider } from './providers/hashing.provider';
 import { BcryptProvider } from './providers/bcrypt.provider';
 import { GoogleStrategy } from './strategies/google.strategy';
-
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/users/users.entity';
 
 @Module({
-  imports: [forwardRef(() => UsersModule), PassportModule.register({ defaultStrategy: 'jwt' }),
+  imports: [
+    forwardRef(() => UsersModule),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    TypeOrmModule.forFeature([User]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -24,10 +28,16 @@ import { GoogleStrategy } from './strategies/google.strategy';
           expiresIn: configService.get<string>('JWT_EXPIRATION', '15m'),
         },
       }),
-    })],
+    }),
+  ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy, TokenService, JwtStrategy, JwtAuthGuard,
-      // Add the HashingProvider (abstract class)
+  providers: [
+    AuthService,
+    GoogleStrategy,
+    TokenService,
+    JwtStrategy,
+    JwtAuthGuard,
+    // Add the HashingProvider (abstract class)
     {
       provide: HashingProvider,
       useClass: BcryptProvider, // Using BcryptProvider as the implementation
