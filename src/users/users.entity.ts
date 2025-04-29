@@ -77,4 +77,10 @@ export class User {
   @Column({nullable: true})
   tokenExpires?: Date
 
+  @Column('simple-array', { default: '' })
+  solvedPuzzles: string[];
+
+  @Column({ type: 'int', default: 0 })
+  points: number;
+
 }
