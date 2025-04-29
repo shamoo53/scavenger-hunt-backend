@@ -10,7 +10,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { StaticModule } from './common/static/static.module';
 import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
-import { PuzzlesModule } from './puzzles/puzzles.module';
 
 @Module({
   imports: [
@@ -39,7 +38,6 @@ import { PuzzlesModule } from './puzzles/puzzles.module';
     UsersModule,
     AuthModule,
     StaticModule,
-    PuzzlesModule,
   ],
   controllers: [AppController],
   providers: [AppService,
