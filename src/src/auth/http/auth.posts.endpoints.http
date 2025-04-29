@@ -1,0 +1,46 @@
+POST http://localhost:3001/auth/sign-in
+Content-Type: application/json
+
+{
+   "email": "user@gmail.com",
+  "password": "User@000"
+}
+
+# @name register
+POST http://localhost:3001/auth/sign-up
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "user@gmail.com",
+  "password": "User@000"
+}
+
+# @name protectedRoute
+GET http://localhost:3001/auth/protected
+Authorization: Bearer token
+
+# @name refreshToken
+POST http://localhost:3001/auth/refresh
+Content-Type: application/json
+{
+  "refreshToken": "refresh token"
+}
+
+
+
+POST http://localhost:3001/auth/request/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@gmail.com"
+}
+
+POST http://localhost:3001/auth/reset/password
+Content-Type: application/json
+
+{
+  "token": "094115",
+  "newpassword": "User@111"
+}
