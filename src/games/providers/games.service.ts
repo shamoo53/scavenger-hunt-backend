@@ -52,4 +52,12 @@ export class GamesService {
     return queryBuilder.getMany();
   }
 
+   async findFeatured(): Promise<Game[]> {
+    return this.gamesRepository.find({
+      where: { isFeatured: true, isActive: true },
+      relations: ['categories'],
+      order: { name: 'ASC' },
+    });
+  }
+
 }

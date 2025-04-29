@@ -28,4 +28,14 @@ export class GamesController {
   findAll(@Query() filterDto: GameFilterDto) {
     return this.gamesService.findAll(filterDto);
   }
+
+    @Get('featured')
+  @ApiOperation({ summary: 'Get featured games' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Return all featured games.',
+  })
+  findFeatured() {
+    return this.gamesService.findFeatured();
+  }
 }
