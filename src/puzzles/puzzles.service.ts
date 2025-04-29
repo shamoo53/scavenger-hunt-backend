@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Puzzle } from './entities/puzzle.entity';
@@ -11,19 +15,21 @@ export class PuzzlesService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Puzzle)
-    private readonly puzzleRepository: Repository<Puzzle>
+    private readonly puzzleRepository: Repository<Puzzle>,
   ) {}
 
   async verifyPuzzle(userId: string, verifyPuzzleDto: VerifyPuzzleDto) {
     const { puzzleId, answer } = verifyPuzzleDto;
 
-    const puzzle = await this.puzzleRepository.findOne({ where: { id: puzzleId } });
+    const puzzle = await this.puzzleRepository.findOne({
+      where: { id: puzzleId },
+    });
     if (!puzzle) throw new NotFoundException('Puzzle not found');
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    if (user.solvedPuzzles.includes(puzzleId)) {
+    if (user) {
       throw new BadRequestException('Puzzle already solved');
     }
 
@@ -31,13 +37,10 @@ export class PuzzlesService {
       throw new BadRequestException('Incorrect answer');
     }
 
-    user.solvedPuzzles.push(puzzleId);
-    user.points += puzzle.pointsAwarded;
-
     await this.userRepository.save(user);
 
     return {
-      message: `Congratulations! Puzzle solved! 🎉 You earned ${puzzle.pointsAwarded} points.`
+      message: `Congratulations! Puzzle solved! 🎉 You earned ${puzzle.pointsAwarded} points.`,
     };
   }
 }
