@@ -1,12 +1,15 @@
 import {
   Injectable,
   NotFoundException,
+  ConflictException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Game } from '../entities/game.entity';
 import { GameFilterDto } from '../dto/game-filter.dto';
 import { Puzzle } from '../../puzzle-engine/entities/puzzle.entity';
+import { CreateGameDto } from '../dto/create-game.dto';
+import { GameCategory } from '../entities/game-category.entity';
 
 @Injectable()
 export class GamesService {
@@ -16,7 +19,50 @@ export class GamesService {
 
         @InjectRepository(Puzzle)
     private readonly puzzlesRepository: Repository<Puzzle>,
+
+        @InjectRepository(GameCategory)
+    private readonly categoriesRepository: Repository<GameCategory>,
   ) {}
+
+   async create(createGameDto: CreateGameDto): Promise<Game> {
+    // Check if slug already exists
+    const existingGame = await this.gamesRepository.findOne({
+      where: { slug: createGameDto.slug },
+    });
+
+    if (existingGame) {
+      throw new ConflictException(
+        `Game with slug '${createGameDto.slug}' already exists`,
+      );
+    }
+
+    // Create new game entity
+    const game = this.gamesRepository.create({
+      name: createGameDto.name,
+      description: createGameDto.description,
+      slug: createGameDto.slug,
+      coverImage: createGameDto.coverImage,
+      isActive: createGameDto.isActive,
+      isFeatured: createGameDto.isFeatured,
+      difficulty: createGameDto.difficulty,
+      estimatedCompletionTime: createGameDto.estimatedCompletionTime,
+    });
+
+    // Add categories if provided
+    if (createGameDto.categoryIds && createGameDto.categoryIds.length > 0) {
+      const categories = await this.categoriesRepository.find({
+        where: { id: In(createGameDto.categoryIds) },
+      });
+
+      if (categories.length !== createGameDto.categoryIds.length) {
+        throw new NotFoundException('One or more categories not found');
+      }
+
+      game.categories = categories;
+    }
+
+    return this.gamesRepository.save(game);
+  }
 
   async findAll(filterDto: GameFilterDto): Promise<Game[]> {
     const { search, difficulty, isActive, isFeatured, categoryIds } = filterDto;

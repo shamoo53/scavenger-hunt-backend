@@ -7,6 +7,8 @@ import {
    Delete,
   UseGuards,
   HttpCode,
+  Post,
+  Body
 } from '@nestjs/common';
 
 import {
@@ -19,11 +21,25 @@ import {
 import { GamesService } from '../providers/games.service';
 import { GameFilterDto } from '../dto/game-filter.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CreateGameDto } from '../dto/create-game.dto';
 
 @ApiTags('games')
 @Controller('games')
 export class GamesController {
   constructor(private readonly gamesService: GamesService) {}
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new game' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'The game has been successfully created.',
+  })
+  create(@Body() createGameDto: CreateGameDto) {
+    return this.gamesService.create(createGameDto);
+  }
+
 
   @Get()
   @ApiOperation({ summary: 'Get all games with optional filtering' })
@@ -91,6 +107,21 @@ export class GamesController {
   @ApiBearerAuth()
   remove(@Param('id') id: string) {
     return this.gamesService.remove(+id);
+  }
+
+    @Get(':id/stats')
+  @ApiOperation({ summary: 'Get game statistics' })
+  @ApiParam({ name: 'id', description: 'Game ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Return statistics for the specified game.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Game not found.',
+  })
+  getGameStats(@Param('id') id: string) {
+    return this.gamesService.getGameStats(+id);
   }
 }
 
