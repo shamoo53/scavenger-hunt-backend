@@ -6,12 +6,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Game } from '../entities/game.entity';
 import { GameFilterDto } from '../dto/game-filter.dto';
+import { Puzzle } from '../../puzzle-engine/entities/puzzle.entity';
 
 @Injectable()
 export class GamesService {
   constructor(
     @InjectRepository(Game)
     private readonly gamesRepository: Repository<Game>,
+
+        @InjectRepository(Puzzle)
+    private readonly puzzlesRepository: Repository<Puzzle>,
   ) {}
 
   async findAll(filterDto: GameFilterDto): Promise<Game[]> {
@@ -93,5 +97,54 @@ export class GamesService {
     if (result.affected === 0) {
       throw new NotFoundException(`Game with ID ${id} not found`);
     }
+  }
+
+    async getGameStats(id: number): Promise<any> {
+    const game = await this.findOne(id);
+
+    // Get total puzzles count
+    const puzzlesCount = await this.puzzlesRepository.count({
+      where: { gameId: id },
+    });
+
+    // Get total points available in the game
+    const pointsResult = await this.puzzlesRepository
+      .createQueryBuilder('puzzle')
+      .select('SUM(puzzle.points)', 'totalPoints')
+      .where('puzzle.gameId = :gameId', { gameId: id })
+      .getRawOne();
+
+    const totalPoints = Number.parseInt(pointsResult.totalPoints) || 0;
+
+    // Get user completion stats
+    const progressStats = await this.gamesRepository.query(
+      `
+      SELECT 
+        COUNT(DISTINCT user_id) as total_players,
+        COUNT(DISTINCT user_id) FILTER (WHERE completed = true) as completions,
+        AVG(completion_percentage) as avg_completion_percentage,
+        AVG(time_spent) FILTER (WHERE completed = true) as avg_completion_time
+      FROM 
+        game_progress
+      WHERE 
+        game_id = $1
+    `,
+      [id],
+    );
+
+    const stats = progressStats[0] || {};
+
+    return {
+      id: game.id,
+      name: game.name,
+      totalPuzzles: puzzlesCount,
+      totalPoints,
+      totalPlayers: Number.parseInt(stats.total_players) || 0,
+      completions: Number.parseInt(stats.completions) || 0,
+      avgCompletionPercentage:
+        Number.parseFloat(stats.avg_completion_percentage) || 0,
+      avgCompletionTimeSeconds:
+        Number.parseFloat(stats.avg_completion_time) || 0,
+    };
   }
 }
