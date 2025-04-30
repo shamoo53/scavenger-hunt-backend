@@ -60,4 +60,18 @@ export class GamesService {
     });
   }
 
+   async findOne(id: number): Promise<Game> {
+    const game = await this.gamesRepository.findOne({
+      where: { id },
+      relations: ['categories'],
+    });
+
+    if (!game) {
+      throw new NotFoundException(`Game with ID ${id} not found`);
+    }
+
+    return game;
+  }
+
+  
 }
