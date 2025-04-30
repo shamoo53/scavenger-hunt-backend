@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GameProgress } from './entities/game-progress.entity';
 import { Game } from '../games/entities/game.entity';
-import { GameProgressDto } from './dto/game-progress.dto';
 import { GameProgressResponseDto } from './dto/game-progress-response.dto';
+import { GameProgressDto } from './dto/game-progress.dto';
+import { SingleGameProgressResponseDto } from './dto/single-game-progress-response.dto';
 
 @Injectable()
 export class GameProgressService {
@@ -70,5 +71,62 @@ export class GameProgressService {
       gamesCompleted: userProgress.filter(progress => progress.percentageCompleted === 100).length,
       gameProgress: gameProgressList,
     };
+  }
+  
+  /**
+   * Get user's progress for a specific game
+   * @param userId The ID of the user
+   * @param gameId The ID of the game
+   * @returns The user's progress data for the specified game
+   */
+  async getUserProgressForGame(userId: number, gameId: number): Promise<SingleGameProgressResponseDto> {
+    // Check if the game exists
+    const game = await this.gameRepository.findOne({ where: { id: gameId } });
+    if (!game) {
+      throw new NotFoundException(`Game with ID ${gameId} not found`);
+    }
+    
+    // Get the user's progress for the specified game
+    const userProgress = await this.gameProgressRepository.findOne({
+      where: { userId, gameId },
+      relations: ['achievements', 'game'],
+    });
+    
+    // If the user has progress for this game
+    if (userProgress) {
+      return {
+        userId,
+        gameId: game.id,
+        gameName: game.name,
+        currentLevel: userProgress.currentLevel,
+        percentageCompleted: userProgress.percentageCompleted,
+        score: userProgress.score || 0,
+        lastPlayedAt: userProgress.updatedAt,
+        challengesCompleted: userProgress.challengesCompleted || 0,
+        totalChallenges: userProgress.totalChallenges || 0,
+        hasStarted: true,
+        achievements: userProgress.achievements.map(achievement => ({
+          id: achievement.id,
+          name: achievement.name,
+          description: achievement.description,
+          unlockedAt: achievement.unlockedAt,
+        })),
+      };
+    } 
+    // If the user has no progress for this game
+    else {
+      return {
+        userId,
+        gameId: game.id,
+        gameName: game.name,
+        currentLevel: 0,
+        percentageCompleted: 0,
+        score: 0,
+        challengesCompleted: 0,
+        totalChallenges: 0,
+        hasStarted: false,
+        achievements: [],
+      };
+    }
   }
 }

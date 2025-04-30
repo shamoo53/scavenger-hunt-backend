@@ -4,11 +4,11 @@ import {
     Column,
     ManyToOne,
     JoinColumn,
-  } from 'typeorm';
-  import { GameProgress } from './game-progress.entity';
+} from 'typeorm';
+import { GameProgress } from './game-progress.entity';
   
   @Entity('achievements')
-  export class Achievement {
+export class Achievement {
     @PrimaryGeneratedColumn()
     id: number;
   
@@ -28,4 +28,4 @@ import {
     @ManyToOne(() => GameProgress, gameProgress => gameProgress.achievements)
     @JoinColumn({ name: 'game_progress_id' })
     gameProgress: GameProgress;
-  }
+}
