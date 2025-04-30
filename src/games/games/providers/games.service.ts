@@ -230,4 +230,28 @@ export class GamesService {
 
     return this.gamesRepository.save(game);
   }
+
+    async recalculateGameStats(id: number): Promise<Game> {
+    const game = await this.findOne(id);
+
+    // Get total puzzles count
+    const puzzlesCount = await this.puzzlesRepository.count({
+      where: { gameId: id },
+    });
+
+    // Get total points available in the game
+    const pointsResult = await this.puzzlesRepository
+      .createQueryBuilder('puzzle')
+      .select('SUM(puzzle.points)', 'totalPoints')
+      .where('puzzle.gameId = :gameId', { gameId: id })
+      .getRawOne();
+
+    const totalPoints = Number.parseInt(pointsResult.totalPoints) || 0;
+
+    // Update game stats
+    game.totalPuzzles = puzzlesCount;
+    game.totalPoints = totalPoints;
+
+    return this.gamesRepository.save(game);
+  }
 }

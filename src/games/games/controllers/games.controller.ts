@@ -142,6 +142,23 @@ export class GamesController {
   update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto) {
     return this.gamesService.update(+id, updateGameDto);
   }
+
+  @Post(':id/recalculate-stats')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Recalculate game statistics' })
+  @ApiParam({ name: 'id', description: 'Game ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Game statistics recalculated successfully.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Game not found.',
+  })
+  @ApiBearerAuth()
+  recalculateGameStats(@Param('id') id: string) {
+    return this.gamesService.recalculateGameStats(+id);
+  }
 }
 
 
