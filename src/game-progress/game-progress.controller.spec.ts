@@ -5,6 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { GameProgress } from './entities/game-progress.entity';
 import { Game } from '../games/entities/game.entity';
 import { GameProgressResponseDto } from './dto/game-progress-response.dto';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('GameProgressController', () => {
   let controller: GameProgressController;
@@ -88,4 +89,60 @@ describe('GameProgressController', () => {
       expect(result).toEqual(mockGameProgressResponse);
     });
   });
+
+  describe('getUserProgressForGame', () => {
+    const mockSingleGameProgressResponse = {
+      userId: 1,
+      gameId: 1,
+      gameName: 'Game 1',
+      currentLevel: 2,
+      percentageCompleted: 50,
+      score: 120,
+      lastPlayedAt: new Date(),
+      challengesCompleted: 3,
+      totalChallenges: 10,
+      hasStarted: true,
+      achievements: [
+        {
+          id: 1,
+          name: 'First Steps',
+          description: 'Started the game',
+          unlockedAt: new Date(),
+        },
+      ],
+    };
+  
+    it('should return user progress for a specific game', async () => {
+      jest.spyOn(service, 'getUserProgressForGame').mockResolvedValue(mockSingleGameProgressResponse);
+  
+      const result = await controller.getUserProgressForGame(
+        { user: { id: 1 } } as any,
+        1
+      );
+      
+      expect(service.getUserProgressForGame).toHaveBeenCalledWith(1, 1);
+      expect(result).toEqual(mockSingleGameProgressResponse);
+    });
+  
+    it('should handle game not found error', async () => {
+      jest.spyOn(service, 'getUserProgressForGame').mockRejectedValue(
+        new NotFoundException('Game with ID 999 not found')
+      );
+  
+      await expect(
+        controller.getUserProgressForGame({ user: { id: 1 } } as any, 999)
+      ).rejects.toThrow(NotFoundException);
+    });
+  
+    it('should handle invalid game ID error', async () => {
+      jest.spyOn(service, 'getUserProgressForGame').mockRejectedValue(
+        new Error('Database error')
+      );
+  
+      await expect(
+        controller.getUserProgressForGame({ user: { id: 1 } } as any, 1)
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
 });
+

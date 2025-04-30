@@ -28,6 +28,15 @@ import {
   
     @Column({ name: 'percentage_completed', type: 'float', default: 0 })
     percentageCompleted: number;
+    
+    @Column({ name: 'score', type: 'int', default: 0, nullable: true })
+    score: number;
+    
+    @Column({ name: 'challenges_completed', type: 'int', default: 0, nullable: true })
+    challengesCompleted: number;
+    
+    @Column({ name: 'total_challenges', type: 'int', default: 0, nullable: true })
+    totalChallenges: number;
   
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
