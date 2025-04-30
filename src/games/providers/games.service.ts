@@ -10,6 +10,7 @@ import { GameFilterDto } from '../dto/game-filter.dto';
 import { Puzzle } from '../../puzzle-engine/entities/puzzle.entity';
 import { CreateGameDto } from '../dto/create-game.dto';
 import { GameCategory } from '../entities/game-category.entity';
+import { UpdateGameDto } from '../dto/update-game.dto';
 
 @Injectable()
 export class GamesService {
@@ -192,5 +193,41 @@ export class GamesService {
       avgCompletionTimeSeconds:
         Number.parseFloat(stats.avg_completion_time) || 0,
     };
+  }
+
+    async update(id: number, updateGameDto: UpdateGameDto): Promise<Game> {
+    const game = await this.findOne(id);
+
+    // Check if slug is being updated and already exists
+    if (updateGameDto.slug && updateGameDto.slug !== game.slug) {
+      const existingGame = await this.gamesRepository.findOne({
+        where: { slug: updateGameDto.slug },
+      });
+
+      if (existingGame) {
+        throw new ConflictException(
+          `Game with slug '${updateGameDto.slug}' already exists`,
+        );
+      }
+    }
+
+    // Update categories if provided
+    if (updateGameDto.categoryIds) {
+      const categories = await this.categoriesRepository.find({
+        where: { id: In(updateGameDto.categoryIds) },
+      });
+
+      if (categories.length !== updateGameDto.categoryIds.length) {
+        throw new NotFoundException('One or more categories not found');
+      }
+
+      game.categories = categories;
+      delete updateGameDto.categoryIds;
+    }
+
+    // Update the game properties
+    Object.assign(game, updateGameDto);
+
+    return this.gamesRepository.save(game);
   }
 }

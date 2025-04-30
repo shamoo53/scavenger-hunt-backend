@@ -8,7 +8,8 @@ import {
   UseGuards,
   HttpCode,
   Post,
-  Body
+  Body,
+  Patch
 } from '@nestjs/common';
 
 import {
@@ -22,6 +23,7 @@ import { GamesService } from '../providers/games.service';
 import { GameFilterDto } from '../dto/game-filter.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateGameDto } from '../dto/create-game.dto';
+import { UpdateGameDto } from '../dto/update-game.dto';
 
 @ApiTags('games')
 @Controller('games')
@@ -122,6 +124,23 @@ export class GamesController {
   })
   getGameStats(@Param('id') id: string) {
     return this.gamesService.getGameStats(+id);
+  }
+
+    @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update a game' })
+  @ApiParam({ name: 'id', description: 'Game ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'The game has been successfully updated.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Game not found.',
+  })
+  @ApiBearerAuth()
+  update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto) {
+    return this.gamesService.update(+id, updateGameDto);
   }
 }
 
