@@ -24,4 +24,14 @@ export class GameCategoriesService {
     });
   }
 
+    async findOne(id: number): Promise<GameCategory> {
+    const category = await this.categoriesRepository.findOne({ where: { id } });
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    return category;
+  }
+
 }
