@@ -50,4 +50,19 @@ export class GameCategoriesController {
     return this.categoriesService.findOne(+id);
   }
 
+    @Get(':id/games')
+  @ApiOperation({ summary: 'Get games by category' })
+  @ApiParam({ name: 'id', description: 'Category ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Return all games in the specified category.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Game category not found.',
+  })
+  findGamesByCategory(@Param('id') id: string) {
+    return this.categoriesService.findGamesByCategory(+id);
+  }
+
 }

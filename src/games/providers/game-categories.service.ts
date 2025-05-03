@@ -34,4 +34,20 @@ export class GameCategoriesService {
     return category;
   }
 
+    async findGamesByCategory(categoryId: number): Promise<Game[]> {
+    const category = await this.findOne(categoryId);
+
+    const games = await this.gamesRepository
+      .createQueryBuilder('game')
+      .innerJoin('game.categories', 'category', 'category.id = :categoryId', {
+        categoryId,
+      })
+      .leftJoinAndSelect('game.categories', 'allCategories')
+      .where('game.isActive = :isActive', { isActive: true })
+      .orderBy('game.name', 'ASC')
+      .getMany();
+
+    return games;
+  }
+
 }
