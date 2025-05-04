@@ -18,12 +18,25 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { GameCategoriesService } from '../providers/game-categories.service';
-
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CreateCategoryDto } from '../dto/create-category.dto';
 
 @ApiTags('game-categories')
 @Controller('game-categories')
 export class GameCategoriesController {
   constructor(private readonly categoriesService: GameCategoriesService) {}
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new game category' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'The game category has been successfully created.',
+  })
+  create(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoriesService.create(createCategoryDto);
+  }
 
   @Get()
   @ApiOperation({ summary: 'Get all game categories' })

@@ -18,6 +18,31 @@ export class GameCategoriesService {
     private readonly gamesRepository: Repository<Game>,
   ) {}
 
+    async create(createCategoryDto: CreateCategoryDto): Promise<GameCategory> {
+    // Check if name or slug already exists
+    const existingCategory = await this.categoriesRepository.findOne({
+      where: [
+        { name: createCategoryDto.name },
+        { slug: createCategoryDto.slug },
+      ],
+    });
+
+    if (existingCategory) {
+      if (existingCategory.name === createCategoryDto.name) {
+        throw new ConflictException(
+          `Category with name '${createCategoryDto.name}' already exists`,
+        );
+      } else {
+        throw new ConflictException(
+          `Category with slug '${createCategoryDto.slug}' already exists`,
+        );
+      }
+    }
+
+    const category = this.categoriesRepository.create(createCategoryDto);
+    return this.categoriesRepository.save(category);
+  }
+
   async findAll(): Promise<GameCategory[]> {
     return this.categoriesRepository.find({
       order: { name: 'ASC' },
