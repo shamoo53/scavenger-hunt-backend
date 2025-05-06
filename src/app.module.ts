@@ -11,6 +11,7 @@ import { StaticModule } from './common/static/static.module';
 import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
 import { GameProgressModule } from './game-progress/game-progress.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { GameProgressModule } from './game-progress/game-progress.module';
     AuthModule,
     StaticModule,
     GameProgressModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService,
