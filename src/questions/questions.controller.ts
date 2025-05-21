@@ -1,11 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from "@nestjs/common"
-import type { QuestionsService } from "./questions.service"
-import type { CreateQuestionDto } from "./dto/create-question.dto"
-import type { UpdateQuestionDto } from "./dto/update-question.dto"
-import type { Question, QuestionDifficulty, QuestionType } from "./question.entity"
-@Controller("questions")
-
-@Controller("questions")
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+} from '@nestjs/common';
+import type { QuestionsService } from './questions.service';
+import type { CreateQuestionDto } from './dto/create-question.dto';
+import type { UpdateQuestionDto } from './dto/update-question.dto';
+import type {
+  Question,
+  QuestionDifficulty,
+  QuestionType,
+} from './question.entity';
+@Controller('questions')
+@Controller('questions')
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
@@ -15,29 +28,34 @@ export class QuestionsController {
   }
 
   @Get()
-  findAll(): Promise<Question[]> {
-    return this.questionsService.findAll()
+  findAll() {
+    return this.questionsService.findAllQuestions();
   }
 
-  @Get("random")
+  @Get('random')
   getRandomQuestions(
     @Query('count') count?: number,
     @Query('difficulty') difficulty?: QuestionDifficulty,
     @Query('type') type?: QuestionType,
     @Query('category') category?: string,
   ): Promise<Question[]> {
-    return this.questionsService.getRandomQuestions(count, difficulty, type, category)
+    return this.questionsService.getRandomQuestions(
+      count,
+      difficulty,
+      type,
+      category,
+    );
   }
 
   @Get('category/:category')
-  getQuestionsByCategory(@Param('category') category: string): Promise<Question[]> {
+  getQuestionsByCategory(@Param('category') category: string) {
     return this.questionsService.getQuestionsByCategory(category);
   }
 
   @Get('difficulty/:difficulty')
   getQuestionsByDifficulty(
     @Param('difficulty') difficulty: QuestionDifficulty,
-  ): Promise<Question[]> {
+  ) {
     return this.questionsService.getQuestionsByDifficulty(difficulty);
   }
 
@@ -46,9 +64,12 @@ export class QuestionsController {
     return this.questionsService.findOne(id);
   }
 
-  @Patch(":id")
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateQuestionDto: UpdateQuestionDto): Promise<Question> {
-    return this.questionsService.update(id, updateQuestionDto)
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateQuestionDto: UpdateQuestionDto,
+  ): Promise<Question> {
+    return this.questionsService.update(id, updateQuestionDto);
   }
 
   @Delete(':id')

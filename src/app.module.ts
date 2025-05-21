@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
@@ -11,7 +10,7 @@ import { StaticModule } from './common/static/static.module';
 import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
 import { GameProgressModule } from './game-progress/game-progress.module';
-import { NotificationModule } from './notification/notification.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -41,10 +40,10 @@ import { NotificationModule } from './notification/notification.module';
     AuthModule,
     StaticModule,
     GameProgressModule,
-    NotificationModule,
   ],
   controllers: [AppController],
-  providers: [AppService,
+  providers: [
+    AppService,
 
     {
       provide: APP_GUARD,
