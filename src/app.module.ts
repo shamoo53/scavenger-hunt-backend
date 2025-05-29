@@ -9,8 +9,9 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { StaticModule } from './common/static/static.module';
 import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
-import { GameProgressModule } from './game-progress/game-progress.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { NftReward } from './nft-reward/nft-reward.entity';
+import { NftRewardModule } from './nft-reward/nft-reward.module';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: configService.get('DATABASE_USERNAME'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User, UserProfile],
+        entities: [User, UserProfile, NftReward],
         synchronize: configService.get('DATABASE_SYNC') === 'true',
         autoLoadEntities: configService.get('DATABASE_AUTOLOAD') === 'true',
         extra: {
@@ -39,7 +40,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     UsersModule,
     AuthModule,
     StaticModule,
-    GameProgressModule,
+    NftRewardModule,
   ],
   controllers: [AppController],
   providers: [
