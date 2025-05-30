@@ -11,6 +11,7 @@ import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
 import { GameProgressModule } from './game-progress/game-progress.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PuzzleFeedbackModule } from './puzzle-feedback/puzzle-feedback.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     AuthModule,
     StaticModule,
     GameProgressModule,
+    PuzzleFeedbackModule
   ],
   controllers: [AppController],
   providers: [
