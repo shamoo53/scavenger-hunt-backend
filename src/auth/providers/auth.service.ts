@@ -18,7 +18,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/users.entity';
 import { Repository } from 'typeorm';
-import { emailverification } from 'src/Email/verification';
+// import { emailverification } from 'src/Email/verification';
 import { generateUniqueKey } from './uniqueKey.provider';
 @Injectable()
 export class AuthService {
@@ -168,12 +168,12 @@ export class AuthService {
       user.tokenExpires = new Date(Date.now() + 15 * 60 * 1000);
 
       await this.userRepository.save(user);
-      await emailverification({
-        name: user.firstName || email.split('@')[0],
-        email: user.email,
-        code: resetCode,
-        type: 'Reset Token',
-      });
+      // await emailverification({
+      //   name: user.firstName || email.split('@')[0],
+      //   email: user.email,
+      //   code: resetCode,
+      //   type: 'Reset Token',
+      // });
 
       return {
         success: true,

@@ -12,6 +12,8 @@ import { User } from './users/users.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NftReward } from './nft-reward/nft-reward.entity';
 import { NftRewardModule } from './nft-reward/nft-reward.module';
+import { GamesModule } from './games/games.module';
+import { PuzzleModule } from './puzzle/puzzle.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { NftRewardModule } from './nft-reward/nft-reward.module';
     AuthModule,
     StaticModule,
     NftRewardModule,
+    GamesModule,
+    PuzzleModule,
   ],
   controllers: [AppController],
   providers: [
