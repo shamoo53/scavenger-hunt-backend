@@ -1,10 +1,22 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
 
 @Entity()
+
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Game } from '../../games/entities/game.entity';
+
+@Entity('puzzles')
 export class Puzzle {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  title: string;
+
+  @Column({ length: 255 })
+  name: string;
+
+  @ManyToOne(() => Game, (game) => game.puzzles)
+  game: Game;
+
+  @Column({ name: 'gameId', nullable: false })
+  gameId: number;
 }

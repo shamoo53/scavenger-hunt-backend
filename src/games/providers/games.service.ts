@@ -1,16 +1,17 @@
 import {
   Injectable,
   NotFoundException,
-  ConflictException
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Game } from '../entities/game.entity';
 import { GameFilterDto } from '../dto/game-filter.dto';
-import { Puzzle } from '../../puzzle-engine/entities/puzzle.entity';
+
 import { CreateGameDto } from '../dto/create-game.dto';
 import { GameCategory } from '../entities/game-category.entity';
 import { UpdateGameDto } from '../dto/update-game.dto';
+import { Puzzle } from 'src/puzzle/entities/puzzle.entity';
 
 @Injectable()
 export class GamesService {
@@ -18,14 +19,14 @@ export class GamesService {
     @InjectRepository(Game)
     private readonly gamesRepository: Repository<Game>,
 
-        @InjectRepository(Puzzle)
+    @InjectRepository(Puzzle)
     private readonly puzzlesRepository: Repository<Puzzle>,
 
-        @InjectRepository(GameCategory)
+    @InjectRepository(GameCategory)
     private readonly categoriesRepository: Repository<GameCategory>,
   ) {}
 
-   async create(createGameDto: CreateGameDto): Promise<Game> {
+  async create(createGameDto: CreateGameDto): Promise<Game> {
     // Check if slug already exists
     const existingGame = await this.gamesRepository.findOne({
       where: { slug: createGameDto.slug },
@@ -104,7 +105,7 @@ export class GamesService {
     return queryBuilder.getMany();
   }
 
-   async findFeatured(): Promise<Game[]> {
+  async findFeatured(): Promise<Game[]> {
     return this.gamesRepository.find({
       where: { isFeatured: true, isActive: true },
       relations: ['categories'],
@@ -112,7 +113,7 @@ export class GamesService {
     });
   }
 
-   async findOne(id: number): Promise<Game> {
+  async findOne(id: number): Promise<Game> {
     const game = await this.gamesRepository.findOne({
       where: { id },
       relations: ['categories'],
@@ -125,7 +126,7 @@ export class GamesService {
     return game;
   }
 
-    async findBySlug(slug: string): Promise<Game> {
+  async findBySlug(slug: string): Promise<Game> {
     const game = await this.gamesRepository.findOne({
       where: { slug },
       relations: ['categories'],
@@ -138,7 +139,7 @@ export class GamesService {
     return game;
   }
 
-   async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<void> {
     const result = await this.gamesRepository.delete(id);
 
     if (result.affected === 0) {
@@ -146,12 +147,12 @@ export class GamesService {
     }
   }
 
-    async getGameStats(id: number): Promise<any> {
+  async getGameStats(id: number): Promise<any> {
     const game = await this.findOne(id);
 
     // Get total puzzles count
     const puzzlesCount = await this.puzzlesRepository.count({
-      where: { gameId: id },
+      where: { id: id },
     });
 
     // Get total points available in the game
@@ -195,7 +196,7 @@ export class GamesService {
     };
   }
 
-    async update(id: number, updateGameDto: UpdateGameDto): Promise<Game> {
+  async update(id: number, updateGameDto: UpdateGameDto): Promise<Game> {
     const game = await this.findOne(id);
 
     // Check if slug is being updated and already exists
@@ -231,12 +232,12 @@ export class GamesService {
     return this.gamesRepository.save(game);
   }
 
-    async recalculateGameStats(id: number): Promise<Game> {
+  async recalculateGameStats(id: number): Promise<Game> {
     const game = await this.findOne(id);
 
     // Get total puzzles count
     const puzzlesCount = await this.puzzlesRepository.count({
-      where: { gameId: id },
+      where: { id: id },
     });
 
     // Get total points available in the game
