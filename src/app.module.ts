@@ -10,6 +10,8 @@ import { StaticModule } from './common/static/static.module';
 import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { NftReward } from './nft-reward/nft-reward.entity';
+import { NftRewardModule } from './nft-reward/nft-reward.module';
 import { GamesModule } from './games/games.module';
 import { PuzzleModule } from './puzzle/puzzle.module';
 
@@ -29,7 +31,7 @@ import { PuzzleModule } from './puzzle/puzzle.module';
         username: configService.get('DATABASE_USERNAME'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User, UserProfile],
+        entities: [User, UserProfile, NftReward],
         synchronize: configService.get('DATABASE_SYNC') === 'true',
         autoLoadEntities: configService.get('DATABASE_AUTOLOAD') === 'true',
         extra: {
@@ -40,6 +42,7 @@ import { PuzzleModule } from './puzzle/puzzle.module';
     UsersModule,
     AuthModule,
     StaticModule,
+    NftRewardModule,
     GamesModule,
     PuzzleModule,
   ],
