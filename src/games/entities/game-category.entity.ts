@@ -1,29 +1,33 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToMany } from "typeorm"
-import { Game } from "./game.entity"
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToMany,
+} from 'typeorm';
+import { Game } from './game.entity';
 
-@Entity("game_categories")
+@Entity('game_categories')
 export class GameCategory {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column({ length: 50, unique: true })
-  name: string
+  name: string;
 
   @Column({ length: 50, unique: true })
-  slug: string
+  slug: string;
 
-  @Column({ type: "text", nullable: true })
-  description: string
+  @Column({ type: 'text', nullable: true })
+  description: string;
 
-  @ManyToMany(
-    () => Game,
-    (game) => game.categories,
-  )
-  games: Game[]
+  @ManyToMany(() => Game, (game) => game.categories)
+  games: Game[];
 
-  @CreateDateColumn({ name: "created_at" })
-  createdAt: Date
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn({ name: "updated_at" })
-  updatedAt: Date
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }
