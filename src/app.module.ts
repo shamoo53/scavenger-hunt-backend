@@ -18,6 +18,7 @@ import { NftReward } from './nft-reward/nft-reward.entity';
 import { NftRewardModule } from './nft-reward/nft-reward.module';
 import { GamesModule } from './games/games.module';
 import { PuzzleModule } from './puzzle/puzzle.module';
+import { FeedbackModule } from './feedback/feedback.module';
 import { DeveloperModule } from './developer/developer.module';
 
 @Module({
@@ -54,6 +55,7 @@ import { DeveloperModule } from './developer/developer.module';
     NftRewardModule,
     GamesModule,
     PuzzleModule,
+    FeedbackModule,
     DeveloperModule,
   ],
   controllers: [AppController],
