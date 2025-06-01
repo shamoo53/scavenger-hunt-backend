@@ -1,9 +1,12 @@
+import { Game } from 'src/games/entities/game.entity';
+import { User } from 'src/users/users.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
   ManyToOne,
 } from 'typeorm';
 import { Game } from '../../games/entities/game.entity';
@@ -14,6 +17,12 @@ export enum PuzzleDifficulty {
   HARD = 'hard',
   EXPERT = 'expert',
 }
+
+export enum PuzzleStatus {
+  DRAFT = 'draft',
+  PUBLISHED = 'published',
+}
+
 
 @Entity('puzzles')
 export class Puzzle {
@@ -32,6 +41,19 @@ export class Puzzle {
     default: PuzzleDifficulty.EASY,
   })
   difficulty: PuzzleDifficulty;
+
+    @Column({
+    type: 'enum',
+    enum: PuzzleStatus,
+    default: PuzzleStatus.DRAFT,
+  })
+  status: PuzzleStatus;
+
+   @ManyToOne(() => User, user => user.puzzles)
+  creator: User;
+
+  @Column('tsvector', { nullable: true })
+  searchVector: string;
 
   @Column('jsonb', { nullable: true })
   solution: any;
