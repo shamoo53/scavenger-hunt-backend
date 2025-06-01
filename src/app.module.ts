@@ -18,6 +18,7 @@ import { NftReward } from './nft-reward/nft-reward.entity';
 import { NftRewardModule } from './nft-reward/nft-reward.module';
 import { GamesModule } from './games/games.module';
 import { PuzzleModule } from './puzzle/puzzle.module';
+import { ImpersonationModule } from './impersonation/impersonation.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { DeveloperModule } from './developer/developer.module';
 
@@ -55,6 +56,7 @@ import { DeveloperModule } from './developer/developer.module';
     NftRewardModule,
     GamesModule,
     PuzzleModule,
+    ImpersonationModule,
     FeedbackModule,
     DeveloperModule,
   ],
