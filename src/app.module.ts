@@ -13,7 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DailyPuzzleModule } from './daily-puzzle/daily-puzzle.module';
 import { PuzzleFeedbackModule } from './puzzle-feedback/puzzle-feedback.module';
 import { PuzzleDependencyModule } from './puzzle-dependency/puzzle_module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GameProgressModule } from './game-progress/game-progress.module';
 import { NftReward } from './nft-reward/nft-reward.entity';
 import { NftRewardModule } from './nft-reward/nft-reward.module';
 import { GamesModule } from './games/games.module';
@@ -22,6 +22,7 @@ import { PuzzleDraftsModule } from './puzzle-drafts/puzzle-drafts.module';
 import { ImpersonationModule } from './impersonation/impersonation.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { DeveloperModule } from './developer/developer.module';
+import { HintRecommenderModule } from './hint-recommender/hint-recommender.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { DeveloperModule } from './developer/developer.module';
     ImpersonationModule,
     FeedbackModule,
     DeveloperModule,
+    HintRecommenderModule,
   ],
   controllers: [AppController],
   providers: [
