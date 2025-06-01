@@ -41,6 +41,8 @@
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
+    "ml-cart": "^2.1.1",
+    "ml-regression": "^6.3.0",
     "nanoid": "^5.1.5",
     "nodemailer": "^6.10.0",
     "passport": "^0.7.0",
