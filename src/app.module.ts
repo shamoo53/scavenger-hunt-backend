@@ -10,6 +10,8 @@ import { StaticModule } from './common/static/static.module';
 import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PuzzleDependencyModule } from './puzzle-dependency/puzzle_module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NftReward } from './nft-reward/nft-reward.entity';
 import { NftRewardModule } from './nft-reward/nft-reward.module';
 import { GamesModule } from './games/games.module';
@@ -42,6 +44,7 @@ import { PuzzleModule } from './puzzle/puzzle.module';
     UsersModule,
     AuthModule,
     StaticModule,
+    PuzzleDependencyModule,
     NftRewardModule,
     GamesModule,
     PuzzleModule,
