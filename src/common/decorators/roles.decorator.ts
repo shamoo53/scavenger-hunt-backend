@@ -1,15 +1,5 @@
-export const Roles = (...roles: string[]) => {
-  return (
-    target: object,
-    key?: string | symbol,
-    descriptor?: PropertyDescriptor,
-  ) => {
-    if (typeof target === 'function') {
-      Reflect.defineMetadata('roles', roles, target);
-    } else if (key && descriptor) {
-      Reflect.defineMetadata('roles', roles, target, key);
-    } else {
-      throw new Error('Invalid usage of Roles decorator');
-    }
-  };
-};
+import { SetMetadata } from '@nestjs/common';
+import { Role } from '../enums/roles.enum';
+
+export const ROLES_KEY = 'roles';
+export const Roles = (...roles: Role[]) => SetMetadata(ROLES_KEY, roles);

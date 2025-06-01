@@ -10,11 +10,17 @@ import { StaticModule } from './common/static/static.module';
 import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { DailyPuzzleModule } from './daily-puzzle/daily-puzzle.module';
+import { PuzzleFeedbackModule } from './puzzle-feedback/puzzle-feedback.module';
+import { PuzzleDependencyModule } from './puzzle-dependency/puzzle_module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NftReward } from './nft-reward/nft-reward.entity';
 import { NftRewardModule } from './nft-reward/nft-reward.module';
 import { GamesModule } from './games/games.module';
 import { PuzzleModule } from './puzzle/puzzle.module';
 import { ImpersonationModule } from './impersonation/impersonation.module';
+import { FeedbackModule } from './feedback/feedback.module';
+import { DeveloperModule } from './developer/developer.module';
 
 @Module({
   imports: [
@@ -43,10 +49,16 @@ import { ImpersonationModule } from './impersonation/impersonation.module';
     UsersModule,
     AuthModule,
     StaticModule,
+    GameProgressModule,
+    DailyPuzzleModule,
+    PuzzleFeedbackModule,
+    PuzzleDependencyModule,
     NftRewardModule,
     GamesModule,
     PuzzleModule,
     ImpersonationModule,
+    FeedbackModule,
+    DeveloperModule,
   ],
   controllers: [AppController],
   providers: [
