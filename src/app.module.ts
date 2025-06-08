@@ -23,6 +23,7 @@ import { ImpersonationModule } from './impersonation/impersonation.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { DeveloperModule } from './developer/developer.module';
 import { HintRecommenderModule } from './hint-recommender/hint-recommender.module';
+import { AbuseDetectionModule } from './abuse-detection/abuse-detection.module';
 import { ContributionModule } from './contribution/contribution.module';
 
 @Module({
@@ -64,6 +65,7 @@ import { ContributionModule } from './contribution/contribution.module';
     FeedbackModule,
     DeveloperModule,
     HintRecommenderModule,
+    AbuseDetectionModule,
     ContributionModule,
   ],
   controllers: [AppController],
