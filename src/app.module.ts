@@ -23,6 +23,7 @@ import { ImpersonationModule } from './impersonation/impersonation.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { DeveloperModule } from './developer/developer.module';
 import { HintRecommenderModule } from './hint-recommender/hint-recommender.module';
+import { CronJobModule } from './cron-job/cron-job.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { HintRecommenderModule } from './hint-recommender/hint-recommender.modul
     FeedbackModule,
     DeveloperModule,
     HintRecommenderModule,
+    CronJobModule,
   ],
   controllers: [AppController],
   providers: [
