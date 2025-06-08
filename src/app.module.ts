@@ -24,6 +24,8 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { DeveloperModule } from './developer/developer.module';
 import { HintRecommenderModule } from './hint-recommender/hint-recommender.module';
 import { CronJobModule } from './cron-job/cron-job.module';
+import { AbuseDetectionModule } from './abuse-detection/abuse-detection.module';
+import { ContributionModule } from './contribution/contribution.module';
 
 @Module({
   imports: [
@@ -65,6 +67,8 @@ import { CronJobModule } from './cron-job/cron-job.module';
     DeveloperModule,
     HintRecommenderModule,
     CronJobModule,
+    AbuseDetectionModule,
+    ContributionModule,
   ],
   controllers: [AppController],
   providers: [
