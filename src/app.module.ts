@@ -7,6 +7,8 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { AuthModule } from "./auth/auth.module"
 import { UserModule } from "./user/user.module"
+import { PuzzlesResolver } from './puzzles/puzzles.resolver';
+import { PuzzlesModule } from './puzzles/puzzles.module';
 
 @Module({
   imports: [
@@ -37,8 +39,9 @@ import { UserModule } from "./user/user.module"
     }),
     AuthModule,
     UserModule,
+    PuzzlesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PuzzlesResolver],
 })
 export class AppModule {}
