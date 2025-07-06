@@ -9,6 +9,8 @@ import { AuthModule } from "./auth/auth.module"
 import { UserModule } from "./user/user.module"
 import { PuzzleModule } from './puzzle/puzzle.module';
 import { RewardModule } from './reward/reward.module';
+import { ConsentModule } from './consent/consent.module';
+import { DraftReviewModule } from './draft-review/draft-review.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { RewardModule } from './reward/reward.module';
     UserModule,
     PuzzleModule,
     RewardModule,
+    ConsentModule,
+    DraftReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
