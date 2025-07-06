@@ -7,6 +7,8 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { AuthModule } from "./auth/auth.module"
 import { UserModule } from "./user/user.module"
+import { PuzzlesResolver } from './puzzles/puzzles.resolver';
+import { PuzzlesModule } from './puzzles/puzzles.module';
 import { PuzzleModule } from './puzzle/puzzle.module';
 import { RewardModule } from './reward/reward.module';
 import { ConsentModule } from './consent/consent.module';
@@ -41,12 +43,13 @@ import { DraftReviewModule } from './draft-review/draft-review.module';
     }),
     AuthModule,
     UserModule,
+    PuzzlesModule,
     PuzzleModule,
     RewardModule,
     ConsentModule,
     DraftReviewModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PuzzlesResolver],
 })
 export class AppModule {}
