@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config"
 import { AuthModule } from "./auth/auth.module"
 import { UserModule } from "./user/user.module"
 import { ConsentModule } from './consent/consent.module';
+import { DraftReviewModule } from './draft-review/draft-review.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ConsentModule } from './consent/consent.module';
     AuthModule,
     UserModule,
     ConsentModule,
+    DraftReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
