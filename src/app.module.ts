@@ -13,6 +13,7 @@ import { PuzzleModule } from './puzzle/puzzle.module';
 import { RewardModule } from './reward/reward.module';
 import { ConsentModule } from './consent/consent.module';
 import { DraftReviewModule } from './draft-review/draft-review.module';
+import { ErrorReportModule } from './error-report/error-report.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { DraftReviewModule } from './draft-review/draft-review.module';
     RewardModule,
     ConsentModule,
     DraftReviewModule,
+    ErrorReportModule,
   ],
   controllers: [AppController],
   providers: [AppService, PuzzlesResolver],
