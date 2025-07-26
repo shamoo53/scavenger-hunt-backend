@@ -41,6 +41,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     UserModule,
     ProgressModule,
     DailyChallengeModule,
+    ContributionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -54,6 +55,7 @@ import { ConsentModule } from './consent/consent.module';
 import { DraftReviewModule } from './draft-review/draft-review.module';
 import { ErrorReportModule } from './error-report/error-report.module';
 import { DailyChallengeModule } from './daily-challenge/daily-challenge.module';
+import { ContributionModule } from './contribution/contribution.module';
 
 @Module({
   imports: [
