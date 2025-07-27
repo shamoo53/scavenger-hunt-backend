@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ProgressModule } from './progress/progress.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ValidatorsModule } from './validators/validators.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -41,6 +42,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     UserModule,
     ProgressModule,
     DailyChallengeModule,
+    ValidatorsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
