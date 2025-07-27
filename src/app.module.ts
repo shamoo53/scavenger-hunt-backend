@@ -8,10 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ProgressModule } from './progress/progress.module';
-import { ErrorReportModule } from './error-report/error-report.module';
-import { GameThemeModule } from './game-theme/game-theme.module';
-
-
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -39,16 +36,11 @@ import { GameThemeModule } from './game-theme/game-theme.module';
         },
       }),
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
     ProgressModule,
-    // PuzzlesModule,
-    // PuzzleModule,
-    // RewardModule,
-    // ConsentModule,
-    // DraftReviewModule,
-    ErrorReportModule,
-    GameThemeModule
+    DailyChallengeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
