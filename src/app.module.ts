@@ -10,6 +10,8 @@ import { UserModule } from './user/user.module';
 import { ProgressModule } from './progress/progress.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ValidatorsModule } from './validators/validators.module';
+import { TriviaModule } from './trivia/trivia.module';
+import { DailyChallengeModule } from './daily-challenge/daily-challenge.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -43,6 +45,9 @@ import { ValidatorsModule } from './validators/validators.module';
     ProgressModule,
     DailyChallengeModule,
     ValidatorsModule,
+    TriviaModule,
+    
+git add 
   ],
   controllers: [AppController],
   providers: [AppService],
