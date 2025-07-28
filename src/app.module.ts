@@ -12,6 +12,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ValidatorsModule } from './validators/validators.module';
 import { TriviaModule } from './trivia/trivia.module';
 import { DailyChallengeModule } from './daily-challenge/daily-challenge.module';
+import { PuzzleUnlockModule } from './puzzle-unlock/puzzle-unlock.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -47,7 +48,7 @@ import { DailyChallengeModule } from './daily-challenge/daily-challenge.module';
     ValidatorsModule,
     TriviaModule,
     
-git add 
+git add, PuzzleUnlockModule 
   ],
   controllers: [AppController],
   providers: [AppService],
