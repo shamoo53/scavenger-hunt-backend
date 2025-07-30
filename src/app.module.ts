@@ -13,6 +13,7 @@ import { ValidatorsModule } from './validators/validators.module';
 import { TriviaModule } from './trivia/trivia.module';
 import { DailyChallengeModule } from './daily-challenge/daily-challenge.module';
 import { PuzzleUnlockModule } from './puzzle-unlock/puzzle-unlock.module';
+import { ReferralCodeModule } from './referral-code/referral-code.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -47,8 +48,8 @@ import { PuzzleUnlockModule } from './puzzle-unlock/puzzle-unlock.module';
     DailyChallengeModule,
     ValidatorsModule,
     TriviaModule,
-    
-git add, PuzzleUnlockModule 
+    PuzzleUnlockModule,
+    ReferralCodeModule
   ],
   controllers: [AppController],
   providers: [AppService],
