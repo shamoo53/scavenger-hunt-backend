@@ -16,6 +16,7 @@ import { PuzzleUnlockModule } from './puzzle-unlock/puzzle-unlock.module';
 import { ReferralCodeModule } from './referral-code/referral-code.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { ClaimHistoryModule } from './claim-history/claim-history.module';
+import { StarknetNewsModule } from './starknet-news/starknet-news.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -54,6 +55,7 @@ import { ClaimHistoryModule } from './claim-history/claim-history.module';
     ReferralCodeModule,
     ReviewsModule,
     ClaimHistoryModule,
+    StarknetNewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
