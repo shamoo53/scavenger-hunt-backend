@@ -169,8 +169,11 @@ describe('EventAnnouncementsModule Integration Tests', () => {
         userId: 'user-123',
         announcementId: createdAnnouncement.id,
         action: 'view' as const,
-        userAgent: 'Mozilla/5.0',
-        ipAddress: '192.168.1.1',
+        timestamp: new Date(),
+        metadata: {
+          userAgent: 'Mozilla/5.0',
+          ipAddress: '192.168.1.1',
+        },
       };
 
       // Track engagement
@@ -264,6 +267,7 @@ describe('EventAnnouncementsModule Integration Tests', () => {
         userId: 'user-123',
         announcementId: 'announcement-123',
         action: 'like' as const,
+        timestamp: new Date(),
       };
 
       await analyticsService.trackEngagement(engagementData);
@@ -271,11 +275,7 @@ describe('EventAnnouncementsModule Integration Tests', () => {
       // Test notification integration
       const notificationData = {
         type: 'new_announcement' as const,
-        announcement: {
-          id: 'announcement-123',
-          title: 'Test Announcement',
-          content: 'Test content',
-        },
+        announcement: mockAnnouncement,
         priority: 'normal' as const,
         targetAudience: ['all'],
       };
@@ -310,7 +310,7 @@ describe('EventAnnouncementsModule Integration Tests', () => {
       const createDto: CreateEventAnnouncementDto = {
         title: 'Complex Workflow Test Announcement',
         content: 'This announcement tests the complete workflow including caching, analytics, notifications, and template generation with comprehensive content.',
-        type: AnnouncementType.URGENT,
+        type: AnnouncementType.MAINTENANCE,
         priority: AnnouncementPriority.CRITICAL,
         category: 'system',
         isPublished: true,
@@ -323,7 +323,7 @@ describe('EventAnnouncementsModule Integration Tests', () => {
         targetAudience: ['all', 'administrators'],
         tags: ['workflow', 'test', 'complex'],
         eventDate: new Date('2024-12-25'),
-        expiryDate: new Date('2024-12-31'),
+        expireAt: new Date('2024-12-31'),
         createdBy: 'admin',
       };
 
@@ -490,6 +490,7 @@ describe('EventAnnouncementsModule Integration Tests', () => {
         userId: 'user-123',
         announcementId: 'announcement-123',
         action: 'view' as const,
+        timestamp: new Date(),
       };
 
       await expect(

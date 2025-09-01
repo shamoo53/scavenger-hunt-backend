@@ -47,11 +47,14 @@ describe('AnnouncementAnalyticsController', () => {
         userId: 'user-123',
         announcementId: 'announcement-123',
         action: 'view',
-        userAgent: 'Mozilla/5.0',
-        ipAddress: '192.168.1.1',
-        referrer: 'https://example.com',
-        duration: 30000,
-        metadata: { source: 'web' },
+        timestamp: new Date(),
+        metadata: {
+          source: 'web',
+          userAgent: 'Mozilla/5.0',
+          ipAddress: '192.168.1.1',
+          referrer: 'https://example.com',
+          duration: 30000,
+        },
       };
 
       analyticsService.trackEngagement.mockResolvedValue(undefined);
@@ -69,6 +72,7 @@ describe('AnnouncementAnalyticsController', () => {
         userId: 'user-123',
         announcementId: 'invalid-id',
         action: 'view',
+        timestamp: new Date(),
       };
 
       analyticsService.trackEngagement.mockRejectedValue(
@@ -88,6 +92,7 @@ describe('AnnouncementAnalyticsController', () => {
           userId: 'user-123',
           announcementId: 'announcement-123',
           action: action as any,
+          timestamp: new Date(),
         };
 
         analyticsService.trackEngagement.mockResolvedValue(undefined);
@@ -110,12 +115,11 @@ describe('AnnouncementAnalyticsController', () => {
         likes: 25,
         shares: 10,
         clicks: 45,
-        acknowledges: 30,
+        acknowledgeCount: 30,
+        commentCount: 5,
+        readTime: 45000,
         engagementRate: 0.73,
-        avgTimeSpent: 45000,
-        uniqueViewers: 120,
-        topReferrers: ['web', 'mobile'],
-        peakEngagementTime: new Date(),
+        conversionRate: 0.15,
       };
 
       analyticsService.getAnnouncementMetrics.mockResolvedValue(mockMetrics);
@@ -139,12 +143,11 @@ describe('AnnouncementAnalyticsController', () => {
         likes: 0,
         shares: 0,
         clicks: 0,
-        acknowledges: 0,
+        acknowledgeCount: 0,
+        commentCount: 0,
+        readTime: 0,
         engagementRate: 0,
-        avgTimeSpent: 0,
-        uniqueViewers: 0,
-        topReferrers: [],
-        peakEngagementTime: null,
+        conversionRate: 0,
       });
 
       const result = await controller.getAnnouncementMetrics(announcementId);
@@ -158,15 +161,36 @@ describe('AnnouncementAnalyticsController', () => {
 
   describe('getPerformanceReport', () => {
     it('should return performance report with default parameters', async () => {
-      const mockReport = {
-        totalAnnouncements: 100,
-        totalViews: 5000,
-        totalEngagements: 1200,
-        avgEngagementRate: 0.24,
-        topPerformers: [],
-        trends: [],
-        period: { start: new Date(), end: new Date() },
-      };
+      const mockReport = [
+        {
+          id: 'announcement-1',
+          title: 'Test Announcement',
+          type: 'GENERAL',
+          publishedAt: new Date(),
+          metrics: {
+            announcementId: 'announcement-1',
+            views: 100,
+            likes: 20,
+            shares: 5,
+            clicks: 15,
+            acknowledgeCount: 10,
+            commentCount: 3,
+            readTime: 45000,
+            engagementRate: 0.24,
+            conversionRate: 0.1,
+          },
+          trends: {
+            daily: {},
+            weekly: {},
+            monthly: {},
+          },
+          audienceInsights: {
+            topDemographics: [],
+            engagementByTimeOfDay: {},
+            deviceTypes: {},
+          },
+        },
+      ];
 
       analyticsService.getAnnouncementPerformanceReport.mockResolvedValue(
         mockReport,
@@ -185,15 +209,36 @@ describe('AnnouncementAnalyticsController', () => {
       const endDate = '2024-01-31';
       const limit = 100;
 
-      const mockReport = {
-        totalAnnouncements: 50,
-        totalViews: 2500,
-        totalEngagements: 600,
-        avgEngagementRate: 0.24,
-        topPerformers: [],
-        trends: [],
-        period: { start: new Date(startDate), end: new Date(endDate) },
-      };
+      const mockReport = [
+        {
+          id: 'announcement-1',
+          title: 'Test Announcement',
+          type: 'GENERAL',
+          publishedAt: new Date(startDate),
+          metrics: {
+            announcementId: 'announcement-1',
+            views: 50,
+            likes: 10,
+            shares: 2,
+            clicks: 8,
+            acknowledgeCount: 5,
+            commentCount: 1,
+            readTime: 30000,
+            engagementRate: 0.24,
+            conversionRate: 0.08,
+          },
+          trends: {
+            daily: {},
+            weekly: {},
+            monthly: {},
+          },
+          audienceInsights: {
+            topDemographics: [],
+            engagementByTimeOfDay: {},
+            deviceTypes: {},
+          },
+        },
+      ];
 
       analyticsService.getAnnouncementPerformanceReport.mockResolvedValue(
         mockReport,
@@ -215,15 +260,7 @@ describe('AnnouncementAnalyticsController', () => {
       const startDate = 'invalid-date';
       const endDate = '2024-01-31';
 
-      analyticsService.getAnnouncementPerformanceReport.mockResolvedValue({
-        totalAnnouncements: 0,
-        totalViews: 0,
-        totalEngagements: 0,
-        avgEngagementRate: 0,
-        topPerformers: [],
-        trends: [],
-        period: { start: new Date(startDate), end: new Date(endDate) },
-      });
+      analyticsService.getAnnouncementPerformanceReport.mockResolvedValue([]);
 
       await controller.getPerformanceReport(startDate, endDate);
 
@@ -239,18 +276,30 @@ describe('AnnouncementAnalyticsController', () => {
         {
           id: 'announcement-1',
           title: 'Top Announcement',
-          views: 1000,
-          likes: 100,
-          shares: 50,
-          engagementScore: 0.95,
-        },
-        {
-          id: 'announcement-2',
-          title: 'Second Announcement',
-          views: 800,
-          likes: 80,
-          shares: 40,
-          engagementScore: 0.85,
+          type: 'GENERAL',
+          publishedAt: new Date(),
+          metrics: {
+            announcementId: 'announcement-1',
+            views: 1000,
+            likes: 100,
+            shares: 50,
+            clicks: 200,
+            acknowledgeCount: 80,
+            commentCount: 20,
+            readTime: 60000,
+            engagementRate: 0.95,
+            conversionRate: 0.3,
+          },
+          trends: {
+            daily: {},
+            weekly: {},
+            monthly: {},
+          },
+          audienceInsights: {
+            topDemographics: [],
+            engagementByTimeOfDay: {},
+            deviceTypes: {},
+          },
         },
       ];
 
@@ -504,6 +553,7 @@ describe('AnnouncementAnalyticsController', () => {
         userId: 'user-123',
         announcementId: 'announcement-123',
         action: 'view',
+        timestamp: new Date(),
       };
 
       await expect(controller.trackEngagement(engagementData)).rejects.toThrow(
