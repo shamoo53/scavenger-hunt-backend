@@ -283,7 +283,7 @@ describe('AnnouncementCacheService', () => {
       };
 
       service.set('complex-key', complexData);
-      const retrieved = service.get('complex-key');
+      const retrieved = service.get('complex-key') as typeof complexData;
 
       expect(retrieved).toEqual(complexData);
       expect(retrieved.nested.array).toEqual([1, 2, 3]);
