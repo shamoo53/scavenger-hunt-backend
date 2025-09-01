@@ -28,6 +28,7 @@ import {
 import { AnnouncementCacheService } from './services/cache.service';
 import { AnnouncementAnalyticsService } from './services/analytics.service';
 import { AnnouncementNotificationService } from './services/notification.service';
+import { AnnouncementsGateway } from './gateways/announcements.gateway';
 
 @Injectable()
 export class EventAnnouncementsService {
@@ -39,6 +40,7 @@ export class EventAnnouncementsService {
     private readonly cacheService: AnnouncementCacheService,
     private readonly analyticsService: AnnouncementAnalyticsService,
     private readonly notificationService: AnnouncementNotificationService,
+    private readonly gateway: AnnouncementsGateway,
   ) {}
 
   async create(
@@ -93,6 +95,14 @@ export class EventAnnouncementsService {
           ),
           targetAudience: savedAnnouncement.targetAudience,
         });
+
+        // Broadcast via gateway (WebSocket or HTTP)
+        await this.gateway.broadcastNewAnnouncement(savedAnnouncement);
+
+        // Send featured notification if applicable
+        if (savedAnnouncement.isFeatured) {
+          await this.gateway.sendFeaturedNotification(savedAnnouncement);
+        }
       }
 
       this.logger.log(
