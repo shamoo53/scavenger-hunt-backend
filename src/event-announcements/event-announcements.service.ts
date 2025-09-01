@@ -644,61 +644,6 @@ export class EventAnnouncementsService {
     }
   }
 
-  async remove(id: string): Promise<void> {
-    try {
-      const announcement = await this.findOne(id);
-      await this.announcementRepository.remove(announcement);
-
-      this.logger.log(`Permanently deleted announcement: ${id}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to remove announcement ${id}: ${error.message}`,
-        error.stack,
-      );
-      throw error;
-    }
-  }
-
-  async softRemove(id: string): Promise<void> {
-    try {
-      const announcement = await this.findOne(id);
-      await this.announcementRepository.softRemove(announcement);
-
-      this.logger.log(`Soft deleted announcement: ${id}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to soft remove announcement ${id}: ${error.message}`,
-        error.stack,
-      );
-      throw error;
-    }
-  }
-
-  async restore(id: string): Promise<EventAnnouncement> {
-    try {
-      const announcement = await this.announcementRepository.findOne({
-        where: { id },
-        withDeleted: true,
-      });
-
-      if (!announcement) {
-        throw new NotFoundException(`Announcement with ID ${id} not found`);
-      }
-
-      await this.announcementRepository.restore(id);
-      const restoredAnnouncement = await this.findOne(id);
-
-      this.logger.log(`Restored announcement: ${id}`);
-      return restoredAnnouncement;
-    } catch (error) {
-      this.logger.error(
-        `Failed to restore announcement ${id}: ${error.message}`,
-        error.stack,
-      );
-      throw error;
-    }
-  }
-
   // Metadata methods
   async getTypes(): Promise<string[]> {
     try {
