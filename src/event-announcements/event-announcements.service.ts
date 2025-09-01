@@ -88,8 +88,10 @@ export class EventAnnouncementsService {
         await this.notificationService.notifyUsers({
           type: 'new_announcement',
           announcement: savedAnnouncement,
-          priority: this.mapPriorityToNotificationPriority(savedAnnouncement.priority),
-          targetAudience: savedAnnouncement.targetAudience
+          priority: this.mapPriorityToNotificationPriority(
+            savedAnnouncement.priority,
+          ),
+          targetAudience: savedAnnouncement.targetAudience,
         });
       }
 
@@ -109,8 +111,11 @@ export class EventAnnouncementsService {
   async findAll(queryDto: QueryEventAnnouncementDto = {}) {
     try {
       // Generate cache key for this query
-      const cacheKey = this.cacheService.generateKey('findAll', JSON.stringify(queryDto));
-      
+      const cacheKey = this.cacheService.generateKey(
+        'findAll',
+        JSON.stringify(queryDto),
+      );
+
       // Try to get cached result
       const cached = this.cacheService.get(cacheKey);
       if (cached) {
@@ -635,17 +640,17 @@ export class EventAnnouncementsService {
   async incrementViewCount(id: string, userId?: string): Promise<void> {
     try {
       await this.announcementRepository.increment({ id }, 'viewCount', 1);
-      
+
       // Track analytics if userId provided
       if (userId) {
         await this.analyticsService.trackEngagement({
           userId,
           announcementId: id,
           action: 'view',
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
-      
+
       // Invalidate cache for this announcement
       this.cacheService.clearByPattern(`announcement:${id}`);
     } catch (error) {
@@ -987,7 +992,7 @@ export class EventAnnouncementsService {
   }
 
   private mapPriorityToNotificationPriority(
-    priority: AnnouncementPriority
+    priority: AnnouncementPriority,
   ): 'low' | 'medium' | 'high' | 'urgent' {
     switch (priority) {
       case AnnouncementPriority.LOW:

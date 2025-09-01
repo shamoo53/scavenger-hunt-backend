@@ -10,7 +10,10 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { AnnouncementAnalyticsService, UserEngagementData } from '../services/analytics.service';
+import {
+  AnnouncementAnalyticsService,
+  UserEngagementData,
+} from '../services/analytics.service';
 
 @Controller('announcement-analytics')
 export class AnnouncementAnalyticsController {
@@ -33,33 +36,44 @@ export class AnnouncementAnalyticsController {
   async getPerformanceReport(
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('limit', ParseIntPipe) limit: number = 50
+    @Query('limit', ParseIntPipe) limit: number = 50,
   ) {
     const start = startDate ? new Date(startDate) : undefined;
     const end = endDate ? new Date(endDate) : undefined;
-    
-    return await this.analyticsService.getAnnouncementPerformanceReport(start, end, limit);
+
+    return await this.analyticsService.getAnnouncementPerformanceReport(
+      start,
+      end,
+      limit,
+    );
   }
 
   @Get('top-performing')
   async getTopPerforming(
-    @Query('metric') metric: 'views' | 'likes' | 'shares' | 'engagement' = 'engagement',
+    @Query('metric')
+    metric: 'views' | 'likes' | 'shares' | 'engagement' = 'engagement',
     @Query('timeframe') timeframe: 'day' | 'week' | 'month' = 'week',
-    @Query('limit', ParseIntPipe) limit: number = 10
+    @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
-    return await this.analyticsService.getTopPerformingAnnouncements(metric, timeframe, limit);
+    return await this.analyticsService.getTopPerformingAnnouncements(
+      metric,
+      timeframe,
+      limit,
+    );
   }
 
   @Get('trends')
   async getEngagementTrends(
     @Query('timeframe') timeframe: 'hour' | 'day' | 'week' | 'month' = 'day',
-    @Query('days', ParseIntPipe) days: number = 30
+    @Query('days', ParseIntPipe) days: number = 30,
   ) {
     return await this.analyticsService.getEngagementTrends(timeframe, days);
   }
 
   @Get('user/:userId/summary')
-  async getUserEngagementSummary(@Param('userId', ParseUUIDPipe) userId: string) {
+  async getUserEngagementSummary(
+    @Param('userId', ParseUUIDPipe) userId: string,
+  ) {
     return await this.analyticsService.getUserEngagementSummary(userId);
   }
 

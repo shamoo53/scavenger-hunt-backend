@@ -53,19 +53,22 @@ export class CreateTemplateDto {
 
   @IsOptional()
   @IsJSON()
-  variables?: Record<string, {
-    type: 'string' | 'number' | 'date' | 'boolean' | 'url' | 'email';
-    required: boolean;
-    defaultValue?: any;
-    description?: string;
-    placeholder?: string;
-    validation?: {
-      min?: number;
-      max?: number;
-      pattern?: string;
-      options?: string[];
-    };
-  }>;
+  variables?: Record<
+    string,
+    {
+      type: 'string' | 'number' | 'date' | 'boolean' | 'url' | 'email';
+      required: boolean;
+      defaultValue?: any;
+      description?: string;
+      placeholder?: string;
+      validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+        options?: string[];
+      };
+    }
+  >;
 
   @IsOptional()
   @IsJSON()
@@ -139,19 +142,22 @@ export class UpdateTemplateDto {
 
   @IsOptional()
   @IsJSON()
-  variables?: Record<string, {
-    type: 'string' | 'number' | 'date' | 'boolean' | 'url' | 'email';
-    required: boolean;
-    defaultValue?: any;
-    description?: string;
-    placeholder?: string;
-    validation?: {
-      min?: number;
-      max?: number;
-      pattern?: string;
-      options?: string[];
-    };
-  }>;
+  variables?: Record<
+    string,
+    {
+      type: 'string' | 'number' | 'date' | 'boolean' | 'url' | 'email';
+      required: boolean;
+      defaultValue?: any;
+      description?: string;
+      placeholder?: string;
+      validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+        options?: string[];
+      };
+    }
+  >;
 
   @IsOptional()
   @IsJSON()

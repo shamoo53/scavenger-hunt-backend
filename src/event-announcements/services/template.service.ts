@@ -1,9 +1,20 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AnnouncementTemplate, TemplateCategory } from '../entities/announcement-template.entity';
+import {
+  AnnouncementTemplate,
+  TemplateCategory,
+} from '../entities/announcement-template.entity';
 import { CreateEventAnnouncementDto } from '../dto/create-event-announcement.dto';
-import { AnnouncementType, AnnouncementPriority } from '../enums/announcement.enum';
+import {
+  AnnouncementType,
+  AnnouncementPriority,
+} from '../enums/announcement.enum';
 
 export interface CreateTemplateDto {
   name: string;
@@ -44,24 +55,32 @@ export class AnnouncementTemplateService {
   /**
    * Create a new template
    */
-  async createTemplate(createDto: CreateTemplateDto): Promise<AnnouncementTemplate> {
+  async createTemplate(
+    createDto: CreateTemplateDto,
+  ): Promise<AnnouncementTemplate> {
     try {
       // Validate template variables
       this.validateTemplateVariables(createDto.variables);
 
       // Validate template content
-      this.validateTemplateContent(createDto.titleTemplate, createDto.contentTemplate, createDto.variables);
+      this.validateTemplateContent(
+        createDto.titleTemplate,
+        createDto.contentTemplate,
+        createDto.variables,
+      );
 
       const template = this.templateRepository.create({
         ...createDto,
         usageCount: 0,
         isActive: true,
-        isSystem: false
+        isSystem: false,
       });
 
       const savedTemplate = await this.templateRepository.save(template);
-      this.logger.log(`Created template: ${savedTemplate.id} - ${savedTemplate.name}`);
-      
+      this.logger.log(
+        `Created template: ${savedTemplate.id} - ${savedTemplate.name}`,
+      );
+
       return savedTemplate;
     } catch (error) {
       this.logger.error(`Failed to create template: ${error.message}`);
@@ -80,10 +99,13 @@ export class AnnouncementTemplateService {
     createdBy?: string;
   }): Promise<AnnouncementTemplate[]> {
     try {
-      const queryBuilder = this.templateRepository.createQueryBuilder('template');
+      const queryBuilder =
+        this.templateRepository.createQueryBuilder('template');
 
       if (filters?.category) {
-        queryBuilder.andWhere('template.category = :category', { category: filters.category });
+        queryBuilder.andWhere('template.category = :category', {
+          category: filters.category,
+        });
       }
 
       if (filters?.type) {
@@ -91,22 +113,27 @@ export class AnnouncementTemplateService {
       }
 
       if (filters?.isActive !== undefined) {
-        queryBuilder.andWhere('template.isActive = :isActive', { isActive: filters.isActive });
+        queryBuilder.andWhere('template.isActive = :isActive', {
+          isActive: filters.isActive,
+        });
       }
 
       if (filters?.createdBy) {
-        queryBuilder.andWhere('template.createdBy = :createdBy', { createdBy: filters.createdBy });
+        queryBuilder.andWhere('template.createdBy = :createdBy', {
+          createdBy: filters.createdBy,
+        });
       }
 
       if (filters?.search) {
         queryBuilder.andWhere(
           '(template.name ILIKE :search OR template.description ILIKE :search OR template.titleTemplate ILIKE :search)',
-          { search: `%${filters.search}%` }
+          { search: `%${filters.search}%` },
         );
       }
 
-      queryBuilder.orderBy('template.usageCount', 'DESC')
-               .addOrderBy('template.updatedAt', 'DESC');
+      queryBuilder
+        .orderBy('template.usageCount', 'DESC')
+        .addOrderBy('template.updatedAt', 'DESC');
 
       return await queryBuilder.getMany();
     } catch (error) {
@@ -121,7 +148,7 @@ export class AnnouncementTemplateService {
   async findTemplateById(id: string): Promise<AnnouncementTemplate> {
     try {
       const template = await this.templateRepository.findOne({ where: { id } });
-      
+
       if (!template) {
         throw new NotFoundException(`Template with ID ${id} not found`);
       }
@@ -139,7 +166,10 @@ export class AnnouncementTemplateService {
   /**
    * Update template
    */
-  async updateTemplate(id: string, updateDto: UpdateTemplateDto): Promise<AnnouncementTemplate> {
+  async updateTemplate(
+    id: string,
+    updateDto: UpdateTemplateDto,
+  ): Promise<AnnouncementTemplate> {
     try {
       const template = await this.findTemplateById(id);
 
@@ -153,11 +183,16 @@ export class AnnouncementTemplateService {
       }
 
       // Validate template content if updated
-      if (updateDto.titleTemplate || updateDto.contentTemplate || updateDto.variables) {
+      if (
+        updateDto.titleTemplate ||
+        updateDto.contentTemplate ||
+        updateDto.variables
+      ) {
         const titleTemplate = updateDto.titleTemplate || template.titleTemplate;
-        const contentTemplate = updateDto.contentTemplate || template.contentTemplate;
+        const contentTemplate =
+          updateDto.contentTemplate || template.contentTemplate;
         const variables = updateDto.variables || template.variables;
-        
+
         this.validateTemplateContent(titleTemplate, contentTemplate, variables);
       }
 
@@ -194,7 +229,9 @@ export class AnnouncementTemplateService {
   /**
    * Generate announcement from template
    */
-  async generateFromTemplate(generateDto: GenerateFromTemplateDto): Promise<CreateEventAnnouncementDto> {
+  async generateFromTemplate(
+    generateDto: GenerateFromTemplateDto,
+  ): Promise<CreateEventAnnouncementDto> {
     try {
       const template = await this.findTemplateById(generateDto.templateId);
 
@@ -203,13 +240,23 @@ export class AnnouncementTemplateService {
       }
 
       // Validate provided variables
-      this.validateProvidedVariables(template.variables || {}, generateDto.variables);
+      this.validateProvidedVariables(
+        template.variables || {},
+        generateDto.variables,
+      );
 
       // Replace variables in templates
-      const title = this.replaceVariables(template.titleTemplate, generateDto.variables);
-      const content = this.replaceVariables(template.contentTemplate, generateDto.variables);
-      const summary = template.summaryTemplate ? 
-        this.replaceVariables(template.summaryTemplate, generateDto.variables) : undefined;
+      const title = this.replaceVariables(
+        template.titleTemplate,
+        generateDto.variables,
+      );
+      const content = this.replaceVariables(
+        template.contentTemplate,
+        generateDto.variables,
+      );
+      const summary = template.summaryTemplate
+        ? this.replaceVariables(template.summaryTemplate, generateDto.variables)
+        : undefined;
 
       // Create announcement DTO
       const announcementDto: CreateEventAnnouncementDto = {
@@ -222,11 +269,15 @@ export class AnnouncementTemplateService {
         // Apply default settings from template
         ...template.defaultSettings,
         // Apply any overrides
-        ...generateDto.overrides
+        ...generateDto.overrides,
       };
 
       // Increment usage count
-      await this.templateRepository.increment({ id: template.id }, 'usageCount', 1);
+      await this.templateRepository.increment(
+        { id: template.id },
+        'usageCount',
+        1,
+      );
 
       this.logger.log(`Generated announcement from template: ${template.id}`);
       return announcementDto;
@@ -246,12 +297,14 @@ export class AnnouncementTemplateService {
   /**
    * Get popular templates
    */
-  async getPopularTemplates(limit: number = 10): Promise<AnnouncementTemplate[]> {
+  async getPopularTemplates(
+    limit: number = 10,
+  ): Promise<AnnouncementTemplate[]> {
     try {
       return await this.templateRepository.find({
         where: { isActive: true },
         order: { usageCount: 'DESC' },
-        take: limit
+        take: limit,
       });
     } catch (error) {
       this.logger.error(`Failed to get popular templates: ${error.message}`);
@@ -262,7 +315,11 @@ export class AnnouncementTemplateService {
   /**
    * Clone template
    */
-  async cloneTemplate(id: string, newName: string, createdBy: string): Promise<AnnouncementTemplate> {
+  async cloneTemplate(
+    id: string,
+    newName: string,
+    createdBy: string,
+  ): Promise<AnnouncementTemplate> {
     try {
       const originalTemplate = await this.findTemplateById(id);
 
@@ -275,7 +332,7 @@ export class AnnouncementTemplateService {
         usageCount: 0,
         isSystem: false,
         createdAt: undefined,
-        updatedAt: undefined
+        updatedAt: undefined,
       });
 
       const savedTemplate = await this.templateRepository.save(clonedTemplate);
@@ -291,7 +348,10 @@ export class AnnouncementTemplateService {
   /**
    * Preview template with variables
    */
-  async previewTemplate(templateId: string, variables: Record<string, any>): Promise<{
+  async previewTemplate(
+    templateId: string,
+    variables: Record<string, any>,
+  ): Promise<{
     title: string;
     content: string;
     summary?: string;
@@ -305,11 +365,14 @@ export class AnnouncementTemplateService {
       return {
         title: this.replaceVariables(template.titleTemplate, variables),
         content: this.replaceVariables(template.contentTemplate, variables),
-        summary: template.summaryTemplate ? 
-          this.replaceVariables(template.summaryTemplate, variables) : undefined
+        summary: template.summaryTemplate
+          ? this.replaceVariables(template.summaryTemplate, variables)
+          : undefined,
       };
     } catch (error) {
-      this.logger.error(`Failed to preview template ${templateId}: ${error.message}`);
+      this.logger.error(
+        `Failed to preview template ${templateId}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -320,10 +383,10 @@ export class AnnouncementTemplateService {
   async initializeSystemTemplates(): Promise<void> {
     try {
       const systemTemplates = this.getSystemTemplateDefinitions();
-      
+
       for (const templateDef of systemTemplates) {
         const existing = await this.templateRepository.findOne({
-          where: { name: templateDef.name, isSystem: true }
+          where: { name: templateDef.name, isSystem: true },
         });
 
         if (!existing) {
@@ -331,7 +394,7 @@ export class AnnouncementTemplateService {
             ...templateDef,
             isSystem: true,
             isActive: true,
-            usageCount: 0
+            usageCount: 0,
           });
 
           await this.templateRepository.save(template);
@@ -339,7 +402,9 @@ export class AnnouncementTemplateService {
         }
       }
     } catch (error) {
-      this.logger.error(`Failed to initialize system templates: ${error.message}`);
+      this.logger.error(
+        `Failed to initialize system templates: ${error.message}`,
+      );
     }
   }
 
@@ -349,20 +414,27 @@ export class AnnouncementTemplateService {
     if (!variables) return;
 
     for (const [key, config] of Object.entries(variables)) {
-      if (!config.type || !['string', 'number', 'date', 'boolean', 'url', 'email'].includes(config.type)) {
+      if (
+        !config.type ||
+        !['string', 'number', 'date', 'boolean', 'url', 'email'].includes(
+          config.type,
+        )
+      ) {
         throw new BadRequestException(`Invalid variable type for ${key}`);
       }
 
       if (typeof config.required !== 'boolean') {
-        throw new BadRequestException(`Variable ${key} must specify required as boolean`);
+        throw new BadRequestException(
+          `Variable ${key} must specify required as boolean`,
+        );
       }
     }
   }
 
   private validateTemplateContent(
-    titleTemplate: string, 
-    contentTemplate: string, 
-    variables?: Record<string, any>
+    titleTemplate: string,
+    contentTemplate: string,
+    variables?: Record<string, any>,
   ): void {
     // Extract variables from templates
     const titleVariables = this.extractVariables(titleTemplate);
@@ -373,25 +445,28 @@ export class AnnouncementTemplateService {
     if (variables) {
       const definedVariables = Object.keys(variables);
       const undefinedVariables = allTemplateVariables.filter(
-        varName => !definedVariables.includes(varName)
+        (varName) => !definedVariables.includes(varName),
       );
 
       if (undefinedVariables.length > 0) {
         throw new BadRequestException(
-          `Undefined variables in template: ${undefinedVariables.join(', ')}`
+          `Undefined variables in template: ${undefinedVariables.join(', ')}`,
         );
       }
     }
   }
 
   private validateProvidedVariables(
-    templateVariables: Record<string, any>, 
-    providedVariables: Record<string, any>
+    templateVariables: Record<string, any>,
+    providedVariables: Record<string, any>,
   ): void {
     for (const [key, config] of Object.entries(templateVariables)) {
       const value = providedVariables[key];
 
-      if (config.required && (value === undefined || value === null || value === '')) {
+      if (
+        config.required &&
+        (value === undefined || value === null || value === '')
+      ) {
         throw new BadRequestException(`Required variable ${key} is missing`);
       }
 
@@ -408,10 +483,14 @@ export class AnnouncementTemplateService {
           throw new BadRequestException(`Variable ${key} must be a string`);
         }
         if (config.validation?.min && value.length < config.validation.min) {
-          throw new BadRequestException(`Variable ${key} must be at least ${config.validation.min} characters`);
+          throw new BadRequestException(
+            `Variable ${key} must be at least ${config.validation.min} characters`,
+          );
         }
         if (config.validation?.max && value.length > config.validation.max) {
-          throw new BadRequestException(`Variable ${key} must be at most ${config.validation.max} characters`);
+          throw new BadRequestException(
+            `Variable ${key} must be at most ${config.validation.max} characters`,
+          );
         }
         break;
 
@@ -420,16 +499,25 @@ export class AnnouncementTemplateService {
           throw new BadRequestException(`Variable ${key} must be a number`);
         }
         if (config.validation?.min && value < config.validation.min) {
-          throw new BadRequestException(`Variable ${key} must be at least ${config.validation.min}`);
+          throw new BadRequestException(
+            `Variable ${key} must be at least ${config.validation.min}`,
+          );
         }
         if (config.validation?.max && value > config.validation.max) {
-          throw new BadRequestException(`Variable ${key} must be at most ${config.validation.max}`);
+          throw new BadRequestException(
+            `Variable ${key} must be at most ${config.validation.max}`,
+          );
         }
         break;
 
       case 'email':
-        if (typeof value !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          throw new BadRequestException(`Variable ${key} must be a valid email`);
+        if (
+          typeof value !== 'string' ||
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        ) {
+          throw new BadRequestException(
+            `Variable ${key} must be a valid email`,
+          );
         }
         break;
 
@@ -441,7 +529,10 @@ export class AnnouncementTemplateService {
     }
   }
 
-  private replaceVariables(template: string, variables: Record<string, any>): string {
+  private replaceVariables(
+    template: string,
+    variables: Record<string, any>,
+  ): string {
     return template.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
       const value = variables[varName];
       return value !== undefined ? String(value) : match;
@@ -450,7 +541,7 @@ export class AnnouncementTemplateService {
 
   private extractVariables(template: string): string[] {
     const matches = template.match(/\{\{(\w+)\}\}/g);
-    return matches ? matches.map(match => match.slice(2, -2)) : [];
+    return matches ? matches.map((match) => match.slice(2, -2)) : [];
   }
 
   private getSystemTemplateDefinitions(): Partial<AnnouncementTemplate>[] {
@@ -479,18 +570,42 @@ We look forward to seeing you there!
         `.trim(),
         summaryTemplate: 'Join us for {{eventName}} on {{eventDate}}',
         variables: {
-          eventName: { type: 'string', required: true, description: 'Name of the event' },
-          eventDate: { type: 'date', required: true, description: 'Event date' },
-          eventTime: { type: 'string', required: true, description: 'Event time' },
-          location: { type: 'string', required: true, description: 'Event location' },
-          description: { type: 'string', required: true, description: 'Event description' },
-          registrationUrl: { type: 'url', required: false, description: 'Registration URL' }
+          eventName: {
+            type: 'string',
+            required: true,
+            description: 'Name of the event',
+          },
+          eventDate: {
+            type: 'date',
+            required: true,
+            description: 'Event date',
+          },
+          eventTime: {
+            type: 'string',
+            required: true,
+            description: 'Event time',
+          },
+          location: {
+            type: 'string',
+            required: true,
+            description: 'Event location',
+          },
+          description: {
+            type: 'string',
+            required: true,
+            description: 'Event description',
+          },
+          registrationUrl: {
+            type: 'url',
+            required: false,
+            description: 'Registration URL',
+          },
         },
         defaultSettings: {
           isFeatured: true,
           notifyUsers: true,
-          targetAudience: ['all']
-        }
+          targetAudience: ['all'],
+        },
       },
       {
         name: 'Maintenance Notice',
@@ -511,16 +626,28 @@ During this time, {{affectedServices}} may be temporarily unavailable.
 We apologize for any inconvenience and appreciate your patience.
         `.trim(),
         variables: {
-          maintenanceDate: { type: 'date', required: true, description: 'Maintenance date' },
-          startTime: { type: 'string', required: true, description: 'Start time' },
+          maintenanceDate: {
+            type: 'date',
+            required: true,
+            description: 'Maintenance date',
+          },
+          startTime: {
+            type: 'string',
+            required: true,
+            description: 'Start time',
+          },
           endTime: { type: 'string', required: true, description: 'End time' },
-          affectedServices: { type: 'string', required: true, description: 'Affected services' }
+          affectedServices: {
+            type: 'string',
+            required: true,
+            description: 'Affected services',
+          },
         },
         defaultSettings: {
           isPinned: true,
           requiresAcknowledgment: true,
-          notifyUsers: true
-        }
+          notifyUsers: true,
+        },
       },
       {
         name: 'Welcome Message',
@@ -544,14 +671,22 @@ If you have any questions, don't hesitate to reach out to our support team.
 Happy exploring!
         `.trim(),
         variables: {
-          platformName: { type: 'string', required: true, description: 'Platform name' },
-          userName: { type: 'string', required: true, description: 'User name' }
+          platformName: {
+            type: 'string',
+            required: true,
+            description: 'Platform name',
+          },
+          userName: {
+            type: 'string',
+            required: true,
+            description: 'User name',
+          },
         },
         defaultSettings: {
           targetAudience: ['new-users'],
-          allowComments: true
-        }
-      }
+          allowComments: true,
+        },
+      },
     ];
   }
 }

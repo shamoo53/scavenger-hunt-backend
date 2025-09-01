@@ -16,22 +16,22 @@ interface CacheItem<T> {
 export class AnnouncementCacheService {
   private readonly logger = new Logger(AnnouncementCacheService.name);
   private readonly cache = new Map<string, CacheItem<any>>();
-  
+
   private readonly defaultConfig: CacheConfig = {
     ttl: 300, // 5 minutes
-    maxSize: 1000
+    maxSize: 1000,
   };
 
   private readonly cacheConfigs: Record<string, CacheConfig> = {
-    'announcement': { ttl: 300, maxSize: 500 }, // Individual announcements
-    'published': { ttl: 180, maxSize: 1 }, // Published announcements list
-    'featured': { ttl: 600, maxSize: 1 }, // Featured announcements
-    'popular': { ttl: 900, maxSize: 10 }, // Popular announcements with different limits
-    'trending': { ttl: 1800, maxSize: 10 }, // Trending announcements
-    'categories': { ttl: 3600, maxSize: 1 }, // Categories list
-    'tags': { ttl: 3600, maxSize: 1 }, // Tags list
-    'statistics': { ttl: 300, maxSize: 1 }, // Statistics
-    'types': { ttl: 86400, maxSize: 1 } // Types (rarely change)
+    announcement: { ttl: 300, maxSize: 500 }, // Individual announcements
+    published: { ttl: 180, maxSize: 1 }, // Published announcements list
+    featured: { ttl: 600, maxSize: 1 }, // Featured announcements
+    popular: { ttl: 900, maxSize: 10 }, // Popular announcements with different limits
+    trending: { ttl: 1800, maxSize: 10 }, // Trending announcements
+    categories: { ttl: 3600, maxSize: 1 }, // Categories list
+    tags: { ttl: 3600, maxSize: 1 }, // Tags list
+    statistics: { ttl: 300, maxSize: 1 }, // Statistics
+    types: { ttl: 86400, maxSize: 1 }, // Types (rarely change)
   };
 
   /**
@@ -40,7 +40,7 @@ export class AnnouncementCacheService {
   get<T>(key: string): T | null {
     try {
       const item = this.cache.get(key);
-      
+
       if (!item) {
         return null;
       }
@@ -82,7 +82,7 @@ export class AnnouncementCacheService {
       const item: CacheItem<T> = {
         data,
         timestamp: Date.now(),
-        ttl
+        ttl,
       };
 
       this.cache.set(key, item);
@@ -109,7 +109,7 @@ export class AnnouncementCacheService {
   clearByPattern(pattern: string): number {
     let cleared = 0;
     const regex = new RegExp(pattern);
-    
+
     for (const key of this.cache.keys()) {
       if (regex.test(key)) {
         this.cache.delete(key);
@@ -117,7 +117,9 @@ export class AnnouncementCacheService {
       }
     }
 
-    this.logger.debug(`Cleared ${cleared} cache items matching pattern: ${pattern}`);
+    this.logger.debug(
+      `Cleared ${cleared} cache items matching pattern: ${pattern}`,
+    );
     return cleared;
   }
 
@@ -143,7 +145,7 @@ export class AnnouncementCacheService {
       size: this.cache.size,
       maxSize: this.defaultConfig.maxSize,
       hitRate: 0, // Would need to track hits/misses for accurate calculation
-      keys: Array.from(this.cache.keys())
+      keys: Array.from(this.cache.keys()),
     };
   }
 
@@ -160,7 +162,7 @@ export class AnnouncementCacheService {
   async getOrSet<T>(
     key: string,
     fetchFunction: () => Promise<T>,
-    customTtl?: number
+    customTtl?: number,
   ): Promise<T> {
     // Try to get from cache first
     const cached = this.get<T>(key);
@@ -174,7 +176,9 @@ export class AnnouncementCacheService {
       this.set(key, data, customTtl);
       return data;
     } catch (error) {
-      this.logger.error(`Cache getOrSet error for key ${key}: ${error.message}`);
+      this.logger.error(
+        `Cache getOrSet error for key ${key}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -192,15 +196,17 @@ export class AnnouncementCacheService {
       'tags',
       'statistics',
       'type:.*',
-      'category:.*'
+      'category:.*',
     ];
 
     if (announcementId) {
       patterns.push(`announcement:${announcementId}`);
     }
 
-    patterns.forEach(pattern => this.clearByPattern(pattern));
-    this.logger.debug(`Invalidated announcement cache${announcementId ? ` for ID: ${announcementId}` : ''}`);
+    patterns.forEach((pattern) => this.clearByPattern(pattern));
+    this.logger.debug(
+      `Invalidated announcement cache${announcementId ? ` for ID: ${announcementId}` : ''}`,
+    );
   }
 
   private getCacheType(key: string): string {
@@ -213,7 +219,7 @@ export class AnnouncementCacheService {
     if (key.includes('tags')) return 'tags';
     if (key.includes('statistics')) return 'statistics';
     if (key.includes('types')) return 'types';
-    
+
     return 'default';
   }
 
@@ -227,8 +233,8 @@ export class AnnouncementCacheService {
       }
     }
 
-    expiredKeys.forEach(key => this.cache.delete(key));
-    
+    expiredKeys.forEach((key) => this.cache.delete(key));
+
     if (expiredKeys.length > 0) {
       this.logger.debug(`Cleaned up ${expiredKeys.length} expired cache items`);
     }

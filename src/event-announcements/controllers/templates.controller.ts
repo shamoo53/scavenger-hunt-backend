@@ -55,17 +55,20 @@ export class AnnouncementTemplatesController {
   async getTemplateStats() {
     const templates = await this.templateService.findAllTemplates();
     const totalTemplates = templates.length;
-    const activeTemplates = templates.filter(t => t.isActive).length;
-    const systemTemplates = templates.filter(t => t.isSystem).length;
-    
-    const mostUsedTemplate = templates.reduce((prev, current) => 
-      (prev.usageCount > current.usageCount) ? prev : current
+    const activeTemplates = templates.filter((t) => t.isActive).length;
+    const systemTemplates = templates.filter((t) => t.isSystem).length;
+
+    const mostUsedTemplate = templates.reduce((prev, current) =>
+      prev.usageCount > current.usageCount ? prev : current,
     );
 
-    const categoriesCount = templates.reduce((acc, template) => {
-      acc[template.category] = (acc[template.category] || 0) + 1;
-      return acc;
-    }, {} as Record<TemplateCategory, number>);
+    const categoriesCount = templates.reduce(
+      (acc, template) => {
+        acc[template.category] = (acc[template.category] || 0) + 1;
+        return acc;
+      },
+      {} as Record<TemplateCategory, number>,
+    );
 
     const typesCount = templates.reduce((acc, template) => {
       acc[template.type] = (acc[template.type] || 0) + 1;
@@ -90,22 +93,27 @@ export class AnnouncementTemplatesController {
   async previewTemplate(@Body() previewDto: PreviewTemplateDto) {
     return await this.templateService.previewTemplate(
       previewDto.templateId,
-      previewDto.variables
+      previewDto.variables,
     );
   }
 
   @Post('generate')
   async generateFromTemplate(@Body() generateDto: GenerateFromTemplateDto) {
-    const announcementDto = await this.templateService.generateFromTemplate(generateDto);
+    const announcementDto =
+      await this.templateService.generateFromTemplate(generateDto);
     return await this.announcementsService.create(announcementDto);
   }
 
   @Post(':id/clone')
   async cloneTemplate(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() cloneDto: CloneTemplateDto
+    @Body() cloneDto: CloneTemplateDto,
   ) {
-    return await this.templateService.cloneTemplate(id, cloneDto.newName, cloneDto.createdBy);
+    return await this.templateService.cloneTemplate(
+      id,
+      cloneDto.newName,
+      cloneDto.createdBy,
+    );
   }
 
   @Get(':id')
@@ -116,7 +124,7 @@ export class AnnouncementTemplatesController {
   @Patch(':id')
   async updateTemplate(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateTemplateDto: UpdateTemplateDto
+    @Body() updateTemplateDto: UpdateTemplateDto,
   ) {
     return await this.templateService.updateTemplate(id, updateTemplateDto);
   }

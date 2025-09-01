@@ -30,7 +30,7 @@ export enum TemplateCategory {
   URGENT = 'urgent',
   SEASON = 'season',
   ACHIEVEMENT = 'achievement',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 @Entity('announcement_templates')
@@ -93,19 +93,22 @@ export class AnnouncementTemplate {
   @Column('json', { nullable: true })
   @IsOptional()
   @IsJSON()
-  variables?: Record<string, {
-    type: 'string' | 'number' | 'date' | 'boolean' | 'url' | 'email';
-    required: boolean;
-    defaultValue?: any;
-    description?: string;
-    placeholder?: string;
-    validation?: {
-      min?: number;
-      max?: number;
-      pattern?: string;
-      options?: string[];
-    };
-  }>;
+  variables?: Record<
+    string,
+    {
+      type: 'string' | 'number' | 'date' | 'boolean' | 'url' | 'email';
+      required: boolean;
+      defaultValue?: any;
+      description?: string;
+      placeholder?: string;
+      validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+        options?: string[];
+      };
+    }
+  >;
 
   @Column('json', { nullable: true })
   @IsOptional()

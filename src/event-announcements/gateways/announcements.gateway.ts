@@ -24,7 +24,9 @@ interface AuthenticatedSocket extends Socket {
   },
   namespace: '/announcements',
 })
-export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class AnnouncementsGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -42,19 +44,20 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
     try {
       // Extract user ID from token or session (simplified for demo)
       const userId = this.extractUserIdFromSocket(client);
-      
+
       if (userId) {
         client.userId = userId;
         this.notificationService.registerSocketConnection(userId, client);
-        
+
         // Join user to their personal room
         client.join(`user_${userId}`);
-        
+
         // Send welcome message with recent announcements
-        const recentAnnouncements = await this.announcementsService.findPublished();
+        const recentAnnouncements =
+          await this.announcementsService.findPublished();
         client.emit('recent_announcements', {
           announcements: recentAnnouncements.slice(0, 5),
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
         this.logger.debug(`User ${userId} connected to announcements gateway`);
@@ -74,7 +77,9 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
     try {
       if (client.userId) {
         this.notificationService.removeSocketConnection(client.userId);
-        this.logger.debug(`User ${client.userId} disconnected from announcements gateway`);
+        this.logger.debug(
+          `User ${client.userId} disconnected from announcements gateway`,
+        );
       }
     } catch (error) {
       this.logger.error(`Disconnection error: ${error.message}`);
@@ -87,7 +92,8 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
   @SubscribeMessage('subscribe_notifications')
   async handleSubscribe(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { categories?: string[]; types?: string[]; preferences?: any }
+    @MessageBody()
+    data: { categories?: string[]; types?: string[]; preferences?: any },
   ): Promise<void> {
     try {
       if (!client.userId) return;
@@ -95,12 +101,12 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
       await this.notificationService.subscribeUser(client.userId, {
         categories: data.categories,
         types: data.types,
-        preferences: data.preferences
+        preferences: data.preferences,
       });
 
       // Join category-specific rooms
       if (data.categories) {
-        data.categories.forEach(category => {
+        data.categories.forEach((category) => {
           client.join(`category_${category}`);
         });
       }
@@ -109,7 +115,7 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
         success: true,
         categories: data.categories,
         types: data.types,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       this.logger.debug(`User ${client.userId} subscribed to notifications`);
@@ -123,18 +129,22 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
    * Unsubscribe from notifications
    */
   @SubscribeMessage('unsubscribe_notifications')
-  async handleUnsubscribe(@ConnectedSocket() client: AuthenticatedSocket): Promise<void> {
+  async handleUnsubscribe(
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ): Promise<void> {
     try {
       if (!client.userId) return;
 
       await this.notificationService.unsubscribeUser(client.userId);
-      
+
       client.emit('unsubscribe_confirmed', {
         success: true,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.debug(`User ${client.userId} unsubscribed from notifications`);
+      this.logger.debug(
+        `User ${client.userId} unsubscribed from notifications`,
+      );
     } catch (error) {
       this.logger.error(`Unsubscribe error: ${error.message}`);
       client.emit('unsubscribe_error', { error: error.message });
@@ -147,17 +157,20 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
   @SubscribeMessage('update_preferences')
   async handleUpdatePreferences(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() preferences: any
+    @MessageBody() preferences: any,
   ): Promise<void> {
     try {
       if (!client.userId) return;
 
-      await this.notificationService.updateUserPreferences(client.userId, preferences);
-      
+      await this.notificationService.updateUserPreferences(
+        client.userId,
+        preferences,
+      );
+
       client.emit('preferences_updated', {
         success: true,
         preferences,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       this.logger.debug(`Updated preferences for user ${client.userId}`);
@@ -171,7 +184,9 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
    * Request live announcement statistics
    */
   @SubscribeMessage('get_live_stats')
-  async handleGetLiveStats(@ConnectedSocket() client: AuthenticatedSocket): Promise<void> {
+  async handleGetLiveStats(
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ): Promise<void> {
     try {
       const stats = await this.announcementsService.getAnnouncementStatistics();
       const notificationStats = this.notificationService.getNotificationStats();
@@ -179,7 +194,7 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
       client.emit('live_stats', {
         announcements: stats,
         notifications: notificationStats,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     } catch (error) {
       this.logger.error(`Live stats error: ${error.message}`);
@@ -193,26 +208,29 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
   @SubscribeMessage('join_announcement')
   async handleJoinAnnouncement(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { announcementId: string }
+    @MessageBody() data: { announcementId: string },
   ): Promise<void> {
     try {
       const { announcementId } = data;
-      
+
       // Verify announcement exists
-      const announcement = await this.announcementsService.findOne(announcementId);
+      const announcement =
+        await this.announcementsService.findOne(announcementId);
       if (!announcement) {
         client.emit('join_error', { error: 'Announcement not found' });
         return;
       }
 
       client.join(`announcement_${announcementId}`);
-      
+
       client.emit('joined_announcement', {
         announcementId,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.debug(`User ${client.userId} joined announcement ${announcementId}`);
+      this.logger.debug(
+        `User ${client.userId} joined announcement ${announcementId}`,
+      );
     } catch (error) {
       this.logger.error(`Join announcement error: ${error.message}`);
       client.emit('join_error', { error: error.message });
@@ -225,18 +243,20 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
   @SubscribeMessage('leave_announcement')
   handleLeaveAnnouncement(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { announcementId: string }
+    @MessageBody() data: { announcementId: string },
   ): void {
     try {
       const { announcementId } = data;
       client.leave(`announcement_${announcementId}`);
-      
+
       client.emit('left_announcement', {
         announcementId,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.debug(`User ${client.userId} left announcement ${announcementId}`);
+      this.logger.debug(
+        `User ${client.userId} left announcement ${announcementId}`,
+      );
     } catch (error) {
       this.logger.error(`Leave announcement error: ${error.message}`);
     }
@@ -248,11 +268,12 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
   @SubscribeMessage('track_engagement')
   async handleTrackEngagement(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: {
+    @MessageBody()
+    data: {
       announcementId: string;
       action: 'view' | 'like' | 'share' | 'click';
       metadata?: any;
-    }
+    },
   ): Promise<void> {
     try {
       if (!client.userId) return;
@@ -268,13 +289,20 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
       // });
 
       // Broadcast engagement to announcement room (optional)
-      this.server.to(`announcement_${announcementId}`).emit('engagement_update', {
-        action,
-        timestamp: new Date(),
-        totalUsers: this.server.sockets.adapter.rooms.get(`announcement_${announcementId}`)?.size || 0
-      });
+      this.server
+        .to(`announcement_${announcementId}`)
+        .emit('engagement_update', {
+          action,
+          timestamp: new Date(),
+          totalUsers:
+            this.server.sockets.adapter.rooms.get(
+              `announcement_${announcementId}`,
+            )?.size || 0,
+        });
 
-      this.logger.debug(`Tracked ${action} engagement for announcement ${announcementId} by user ${client.userId}`);
+      this.logger.debug(
+        `Tracked ${action} engagement for announcement ${announcementId} by user ${client.userId}`,
+      );
     } catch (error) {
       this.logger.error(`Engagement tracking error: ${error.message}`);
     }
@@ -288,19 +316,23 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
       // Broadcast to all connected users
       this.server.emit('new_announcement', {
         announcement,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Broadcast to category-specific rooms
       if (announcement.category) {
-        this.server.to(`category_${announcement.category}`).emit('category_announcement', {
-          announcement,
-          category: announcement.category,
-          timestamp: new Date()
-        });
+        this.server
+          .to(`category_${announcement.category}`)
+          .emit('category_announcement', {
+            announcement,
+            category: announcement.category,
+            timestamp: new Date(),
+          });
       }
 
-      this.logger.debug(`Broadcasted new announcement ${announcement.id} to all users`);
+      this.logger.debug(
+        `Broadcasted new announcement ${announcement.id} to all users`,
+      );
     } catch (error) {
       this.logger.error(`Broadcast error: ${error.message}`);
     }
@@ -312,12 +344,16 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
   async broadcastAnnouncementUpdate(announcement: any): Promise<void> {
     try {
       // Broadcast to announcement-specific room
-      this.server.to(`announcement_${announcement.id}`).emit('announcement_updated', {
-        announcement,
-        timestamp: new Date()
-      });
+      this.server
+        .to(`announcement_${announcement.id}`)
+        .emit('announcement_updated', {
+          announcement,
+          timestamp: new Date(),
+        });
 
-      this.logger.debug(`Broadcasted update for announcement ${announcement.id}`);
+      this.logger.debug(
+        `Broadcasted update for announcement ${announcement.id}`,
+      );
     } catch (error) {
       this.logger.error(`Broadcast update error: ${error.message}`);
     }
@@ -331,10 +367,12 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
       this.server.emit('urgent_announcement', {
         announcement,
         priority: 'urgent',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Sent urgent notification for announcement ${announcement.id}`);
+      this.logger.log(
+        `Sent urgent notification for announcement ${announcement.id}`,
+      );
     } catch (error) {
       this.logger.error(`Urgent notification error: ${error.message}`);
     }
@@ -346,14 +384,15 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
   getConnectionStats(): Record<string, any> {
     const connectedSockets = this.server.sockets.sockets;
     const totalConnections = connectedSockets.size;
-    const authenticatedConnections = Array.from(connectedSockets.values())
-      .filter(socket => (socket as AuthenticatedSocket).userId).length;
+    const authenticatedConnections = Array.from(
+      connectedSockets.values(),
+    ).filter((socket) => (socket as AuthenticatedSocket).userId).length;
 
     return {
       totalConnections,
       authenticatedConnections,
       rooms: Array.from(this.server.sockets.adapter.rooms.keys()),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -364,7 +403,7 @@ export class AnnouncementsGateway implements OnGatewayConnection, OnGatewayDisco
       // In a real implementation, you would extract this from JWT token or session
       // For demo purposes, we'll use a query parameter
       const userId = socket.handshake.query.userId as string;
-      
+
       if (!userId) {
         this.logger.warn('No userId provided in socket connection');
         return null;
