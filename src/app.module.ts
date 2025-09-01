@@ -17,6 +17,7 @@ import { ReferralCodeModule } from './referral-code/referral-code.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { ClaimHistoryModule } from './claim-history/claim-history.module';
 import { StarknetNewsModule } from './starknet-news/starknet-news.module';
+import { EventAnnouncementsModule } from './event-announcements/event-announcements.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -56,6 +57,7 @@ import { StarknetNewsModule } from './starknet-news/starknet-news.module';
     ReviewsModule,
     ClaimHistoryModule,
     StarknetNewsModule,
+    EventAnnouncementsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
