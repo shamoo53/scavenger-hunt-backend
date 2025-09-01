@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { StarknetNewsService } from './starknet-news.service';
 import { StarknetNews } from './entities/news.entity';
 import { CreateNewsDto } from './dto/create-news.dto';
@@ -15,15 +15,25 @@ const mockNewsRepository = () => ({
   findOne: jest.fn(),
   preload: jest.fn(),
   remove: jest.fn(),
+  softRemove: jest.fn(),
+  softDelete: jest.fn(),
+  recover: jest.fn(),
+  increment: jest.fn(),
+  decrement: jest.fn(),
+  update: jest.fn(),
   createQueryBuilder: jest.fn(() => ({
     select: jest.fn().mockReturnThis(),
+    addSelect: jest.fn().mockReturnThis(),
+    from: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
     skip: jest.fn().mockReturnThis(),
     take: jest.fn().mockReturnThis(),
     getManyAndCount: jest.fn(),
+    getMany: jest.fn(),
     getRawMany: jest.fn(),
+    getRawOne: jest.fn(),
   })),
 });
 
@@ -185,6 +195,253 @@ describe('StarknetNewsService', () => {
 
       expect(repository.findOne).toHaveBeenCalledWith({ where: { id: '1' } });
       expect(repository.remove).toHaveBeenCalledWith(mockNews);
+    });
+  });
+
+  describe('engagement tracking', () => {
+    describe('incrementViewCount', () => {
+      it('should increment view count', async () => {
+        repository.increment.mockResolvedValue(undefined);
+
+        await service.incrementViewCount('1');
+
+        expect(repository.increment).toHaveBeenCalledWith(
+          { id: '1' },
+          'viewCount',
+          1,
+        );
+      });
+    });
+
+    describe('incrementLikeCount', () => {
+      it('should increment like count', async () => {
+        repository.increment.mockResolvedValue(undefined);
+
+        await service.incrementLikeCount('1');
+
+        expect(repository.increment).toHaveBeenCalledWith(
+          { id: '1' },
+          'likeCount',
+          1,
+        );
+      });
+    });
+
+    describe('decrementLikeCount', () => {
+      it('should decrement like count', async () => {
+        repository.decrement.mockResolvedValue(undefined);
+
+        await service.decrementLikeCount('1');
+
+        expect(repository.decrement).toHaveBeenCalledWith(
+          { id: '1' },
+          'likeCount',
+          1,
+        );
+      });
+    });
+
+    describe('incrementShareCount', () => {
+      it('should increment share count', async () => {
+        repository.increment.mockResolvedValue(undefined);
+
+        await service.incrementShareCount('1');
+
+        expect(repository.increment).toHaveBeenCalledWith(
+          { id: '1' },
+          'shareCount',
+          1,
+        );
+      });
+    });
+  });
+
+  describe('analytics and statistics', () => {
+    describe('getNewsStatistics', () => {
+      it('should return comprehensive news statistics', async () => {
+        const mockStats = {
+          totalNews: 100,
+          publishedNews: 80,
+          draftNews: 20,
+          scheduledNews: 5,
+          totalViews: 1000,
+          totalLikes: 200,
+          totalShares: 50,
+          categoriesCount: 5,
+        };
+
+        const mockTagsResult = { tagsCount: 15 };
+
+        const queryBuilder = repository.createQueryBuilder();
+        queryBuilder.getRawOne
+          .mockResolvedValueOnce(mockStats)
+          .mockResolvedValueOnce(mockTagsResult);
+
+        const result = await service.getNewsStatistics();
+
+        expect(result).toEqual({ ...mockStats, tagsCount: 15 });
+      });
+    });
+
+    describe('getPopularNews', () => {
+      it('should return popular news articles', async () => {
+        const mockNews = [
+          {
+            id: '1',
+            title: 'Popular News',
+            viewCount: 1000,
+            likeCount: 100,
+          },
+        ];
+
+        repository.find.mockResolvedValue(mockNews);
+
+        const result = await service.getPopularNews(5);
+
+        expect(repository.find).toHaveBeenCalledWith({
+          where: { isPublished: true, deletedAt: expect.anything() },
+          order: { viewCount: 'DESC', likeCount: 'DESC' },
+          take: 5,
+        });
+        expect(result).toEqual(mockNews);
+      });
+    });
+
+    describe('getTrendingNews', () => {
+      it('should return trending news articles', async () => {
+        const mockNews = [
+          {
+            id: '1',
+            title: 'Trending News',
+            publishedAt: new Date(),
+            viewCount: 500,
+          },
+        ];
+
+        repository.find.mockResolvedValue(mockNews);
+
+        const result = await service.getTrendingNews(7, 10);
+
+        expect(repository.find).toHaveBeenCalledWith({
+          where: {
+            isPublished: true,
+            publishedAt: expect.any(Object),
+            deletedAt: expect.anything(),
+          },
+          order: { viewCount: 'DESC', likeCount: 'DESC' },
+          take: 10,
+        });
+        expect(result).toEqual(mockNews);
+      });
+    });
+
+    describe('getFeaturedNews', () => {
+      it('should return featured news articles', async () => {
+        const mockNews = [
+          {
+            id: '1',
+            title: 'Featured News',
+            isFeatured: true,
+          },
+        ];
+
+        repository.find.mockResolvedValue(mockNews);
+
+        const result = await service.getFeaturedNews();
+
+        expect(repository.find).toHaveBeenCalledWith({
+          where: {
+            isPublished: true,
+            isFeatured: true,
+            deletedAt: expect.anything(),
+          },
+          order: { publishedAt: 'DESC' },
+        });
+        expect(result).toEqual(mockNews);
+      });
+    });
+  });
+
+  describe('soft delete functionality', () => {
+    describe('softRemove', () => {
+      it('should soft delete a news article', async () => {
+        const mockNews = {
+          id: '1',
+          title: 'Test News',
+          content: 'Test content',
+        };
+
+        repository.findOne.mockResolvedValue(mockNews);
+        repository.softRemove.mockResolvedValue(mockNews);
+
+        await service.softRemove('1');
+
+        expect(repository.softRemove).toHaveBeenCalledWith(mockNews);
+      });
+    });
+
+    describe('restore', () => {
+      it('should restore a soft deleted news article', async () => {
+        const mockNews = {
+          id: '1',
+          title: 'Test News',
+          deletedAt: new Date(),
+        };
+
+        repository.findOne.mockResolvedValue(mockNews);
+        repository.recover.mockResolvedValue({ ...mockNews, deletedAt: null });
+
+        const result = await service.restore('1');
+
+        expect(repository.findOne).toHaveBeenCalledWith({
+          where: { id: '1' },
+          withDeleted: true,
+        });
+        expect(repository.recover).toHaveBeenCalledWith(mockNews);
+        expect(result.deletedAt).toBeNull();
+      });
+    });
+  });
+
+  describe('content validation', () => {
+    it('should validate content and throw error for invalid data', async () => {
+      const invalidDto: CreateNewsDto = {
+        title: 'Short', // Too short
+        content: 'Too short', // Too short
+        tags: new Array(15).fill('tag'), // Too many tags
+        slug: 'Invalid Slug!', // Invalid characters
+      };
+
+      await expect(service.create(invalidDto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe('bulk operations', () => {
+    describe('bulkUpdate', () => {
+      it('should update multiple news articles', async () => {
+        const ids = ['1', '2', '3'];
+        const updateData = { isPublished: true };
+
+        repository.update.mockResolvedValue(undefined);
+
+        await service.bulkUpdate(ids, updateData);
+
+        expect(repository.update).toHaveBeenCalledWith(ids, updateData);
+      });
+    });
+
+    describe('bulkDelete', () => {
+      it('should soft delete multiple news articles', async () => {
+        const ids = ['1', '2', '3'];
+
+        repository.softDelete.mockResolvedValue(undefined);
+
+        await service.bulkDelete(ids);
+
+        expect(repository.softDelete).toHaveBeenCalledWith(ids);
+      });
     });
   });
 });
