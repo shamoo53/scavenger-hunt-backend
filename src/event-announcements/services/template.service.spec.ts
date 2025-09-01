@@ -2,9 +2,19 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { AnnouncementTemplateService, CreateTemplateDto, GenerateFromTemplateDto } from './template.service';
-import { AnnouncementTemplate, TemplateCategory } from '../entities/announcement-template.entity';
-import { AnnouncementType, AnnouncementPriority } from '../enums/announcement.enum';
+import {
+  AnnouncementTemplateService,
+  CreateTemplateDto,
+  GenerateFromTemplateDto,
+} from './template.service';
+import {
+  AnnouncementTemplate,
+  TemplateCategory,
+} from '../entities/announcement-template.entity';
+import {
+  AnnouncementType,
+  AnnouncementPriority,
+} from '../enums/announcement.enum';
 
 describe('AnnouncementTemplateService', () => {
   let service: AnnouncementTemplateService;
@@ -41,7 +51,9 @@ describe('AnnouncementTemplateService', () => {
       ],
     }).compile();
 
-    service = module.get<AnnouncementTemplateService>(AnnouncementTemplateService);
+    service = module.get<AnnouncementTemplateService>(
+      AnnouncementTemplateService,
+    );
     repository = module.get<Repository<AnnouncementTemplate>>(
       getRepositoryToken(AnnouncementTemplate),
     );
@@ -65,7 +77,8 @@ describe('AnnouncementTemplateService', () => {
         type: AnnouncementType.EVENT,
         priority: AnnouncementPriority.HIGH,
         titleTemplate: '🎉 {{eventName}} - {{eventDate}}',
-        contentTemplate: 'Join us for {{eventName}} on {{eventDate}} at {{location}}!',
+        contentTemplate:
+          'Join us for {{eventName}} on {{eventDate}} at {{location}}!',
         variables: {
           eventName: {
             type: 'string',
@@ -129,7 +142,9 @@ describe('AnnouncementTemplateService', () => {
         createdBy: 'admin-123',
       };
 
-      await expect(service.createTemplate(createDto)).rejects.toThrow(BadRequestException);
+      await expect(service.createTemplate(createDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should validate variable configuration', async () => {
@@ -149,7 +164,9 @@ describe('AnnouncementTemplateService', () => {
         createdBy: 'admin-123',
       };
 
-      await expect(service.createTemplate(createDto)).rejects.toThrow(BadRequestException);
+      await expect(service.createTemplate(createDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should validate required field configuration', async () => {
@@ -169,7 +186,9 @@ describe('AnnouncementTemplateService', () => {
         createdBy: 'admin-123',
       };
 
-      await expect(service.createTemplate(createDto)).rejects.toThrow(BadRequestException);
+      await expect(service.createTemplate(createDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -199,7 +218,9 @@ describe('AnnouncementTemplateService', () => {
         isActive: true,
       });
 
-      expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith('template');
+      expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith(
+        'template',
+      );
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'template.category = :category',
         { category: TemplateCategory.EVENT },
@@ -229,8 +250,14 @@ describe('AnnouncementTemplateService', () => {
 
       await service.findAllTemplates();
 
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('template.usageCount', 'DESC');
-      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith('template.updatedAt', 'DESC');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'template.usageCount',
+        'DESC',
+      );
+      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
+        'template.updatedAt',
+        'DESC',
+      );
     });
   });
 
@@ -255,8 +282,9 @@ describe('AnnouncementTemplateService', () => {
     it('should throw NotFoundException for non-existent template', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findTemplateById('non-existent'))
-        .rejects.toThrow(NotFoundException);
+      await expect(service.findTemplateById('non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -285,12 +313,16 @@ describe('AnnouncementTemplateService', () => {
 
       mockRepository.findOne.mockResolvedValue(mockTemplate);
       mockRepository.update.mockResolvedValue({});
-      mockRepository.findOne.mockResolvedValueOnce(mockTemplate) // First call for finding
+      mockRepository.findOne
+        .mockResolvedValueOnce(mockTemplate) // First call for finding
         .mockResolvedValueOnce({ ...mockTemplate, ...updateDto }); // Second call after update
 
       const result = await service.updateTemplate('template-123', updateDto);
 
-      expect(mockRepository.update).toHaveBeenCalledWith('template-123', updateDto);
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        'template-123',
+        updateDto,
+      );
       expect(result.name).toBe(updateDto.name);
     });
 
@@ -303,10 +335,12 @@ describe('AnnouncementTemplateService', () => {
 
       mockRepository.findOne.mockResolvedValue(mockTemplate);
 
-      await expect(service.updateTemplate('template-123', {
-        name: 'Updated System Template',
-        updatedBy: 'admin-456',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        service.updateTemplate('template-123', {
+          name: 'Updated System Template',
+          updatedBy: 'admin-456',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should validate updated variables', async () => {
@@ -320,16 +354,18 @@ describe('AnnouncementTemplateService', () => {
 
       mockRepository.findOne.mockResolvedValue(mockTemplate);
 
-      await expect(service.updateTemplate('template-123', {
-        variables: {
-          // newVar is used in title but not defined
-          otherVar: {
-            type: 'string',
-            required: true,
+      await expect(
+        service.updateTemplate('template-123', {
+          variables: {
+            // newVar is used in title but not defined
+            otherVar: {
+              type: 'string',
+              required: true,
+            },
           },
-        },
-        updatedBy: 'admin-456',
-      })).rejects.toThrow(BadRequestException);
+          updatedBy: 'admin-456',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -358,8 +394,9 @@ describe('AnnouncementTemplateService', () => {
 
       mockRepository.findOne.mockResolvedValue(mockTemplate);
 
-      await expect(service.deleteTemplate('template-123'))
-        .rejects.toThrow(BadRequestException);
+      await expect(service.deleteTemplate('template-123')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -372,7 +409,8 @@ describe('AnnouncementTemplateService', () => {
         type: AnnouncementType.EVENT,
         priority: AnnouncementPriority.HIGH,
         titleTemplate: '🎉 {{eventName}} - {{eventDate}}',
-        contentTemplate: 'Join us for {{eventName}} on {{eventDate}} at {{location}}!',
+        contentTemplate:
+          'Join us for {{eventName}} on {{eventDate}} at {{location}}!',
         summaryTemplate: 'Event: {{eventName}}',
         variables: {
           eventName: {
@@ -414,7 +452,9 @@ describe('AnnouncementTemplateService', () => {
       const result = await service.generateFromTemplate(generateDto);
 
       expect(result.title).toBe('🎉 Spring Festival - 2024-03-15');
-      expect(result.content).toBe('Join us for Spring Festival on 2024-03-15 at Central Park!');
+      expect(result.content).toBe(
+        'Join us for Spring Festival on 2024-03-15 at Central Park!',
+      );
       expect(result.summary).toBe('Event: Spring Festival');
       expect(result.type).toBe(AnnouncementType.EVENT);
       expect(result.priority).toBe(AnnouncementPriority.HIGH);
@@ -458,8 +498,9 @@ describe('AnnouncementTemplateService', () => {
         createdBy: 'admin-789',
       };
 
-      await expect(service.generateFromTemplate(generateDto))
-        .rejects.toThrow(BadRequestException);
+      await expect(service.generateFromTemplate(generateDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should not generate from inactive template', async () => {
@@ -476,8 +517,9 @@ describe('AnnouncementTemplateService', () => {
         createdBy: 'admin-789',
       };
 
-      await expect(service.generateFromTemplate(generateDto))
-        .rejects.toThrow(BadRequestException);
+      await expect(service.generateFromTemplate(generateDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -503,18 +545,22 @@ describe('AnnouncementTemplateService', () => {
       mockRepository.findOne.mockResolvedValue(mockTemplate);
 
       // Test too short
-      await expect(service.generateFromTemplate({
-        templateId: 'template-123',
-        variables: { stringVar: 'abc' }, // Too short
-        createdBy: 'admin',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        service.generateFromTemplate({
+          templateId: 'template-123',
+          variables: { stringVar: 'abc' }, // Too short
+          createdBy: 'admin',
+        }),
+      ).rejects.toThrow(BadRequestException);
 
       // Test too long
-      await expect(service.generateFromTemplate({
-        templateId: 'template-123',
-        variables: { stringVar: 'this is way too long for the validation' }, // Too long
-        createdBy: 'admin',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        service.generateFromTemplate({
+          templateId: 'template-123',
+          variables: { stringVar: 'this is way too long for the validation' }, // Too long
+          createdBy: 'admin',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should validate number variables', async () => {
@@ -538,18 +584,22 @@ describe('AnnouncementTemplateService', () => {
       mockRepository.findOne.mockResolvedValue(mockTemplate);
 
       // Test invalid type
-      await expect(service.generateFromTemplate({
-        templateId: 'template-123',
-        variables: { numberVar: 'not a number' },
-        createdBy: 'admin',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        service.generateFromTemplate({
+          templateId: 'template-123',
+          variables: { numberVar: 'not a number' },
+          createdBy: 'admin',
+        }),
+      ).rejects.toThrow(BadRequestException);
 
       // Test out of range
-      await expect(service.generateFromTemplate({
-        templateId: 'template-123',
-        variables: { numberVar: 150 }, // Too high
-        createdBy: 'admin',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        service.generateFromTemplate({
+          templateId: 'template-123',
+          variables: { numberVar: 150 }, // Too high
+          createdBy: 'admin',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should validate email variables', async () => {
@@ -568,11 +618,13 @@ describe('AnnouncementTemplateService', () => {
 
       mockRepository.findOne.mockResolvedValue(mockTemplate);
 
-      await expect(service.generateFromTemplate({
-        templateId: 'template-123',
-        variables: { emailVar: 'invalid-email' },
-        createdBy: 'admin',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        service.generateFromTemplate({
+          templateId: 'template-123',
+          variables: { emailVar: 'invalid-email' },
+          createdBy: 'admin',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should validate URL variables', async () => {
@@ -591,11 +643,13 @@ describe('AnnouncementTemplateService', () => {
 
       mockRepository.findOne.mockResolvedValue(mockTemplate);
 
-      await expect(service.generateFromTemplate({
-        templateId: 'template-123',
-        variables: { urlVar: 'not-a-url' },
-        createdBy: 'admin',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        service.generateFromTemplate({
+          templateId: 'template-123',
+          variables: { urlVar: 'not-a-url' },
+          createdBy: 'admin',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -655,7 +709,11 @@ describe('AnnouncementTemplateService', () => {
       mockRepository.create.mockReturnValue(clonedTemplate);
       mockRepository.save.mockResolvedValue(clonedTemplate);
 
-      const result = await service.cloneTemplate('original-123', 'Cloned Template', 'admin-789');
+      const result = await service.cloneTemplate(
+        'original-123',
+        'Cloned Template',
+        'admin-789',
+      );
 
       expect(result.name).toBe('Cloned Template');
       expect(result.usageCount).toBe(0);
@@ -698,7 +756,7 @@ describe('AnnouncementTemplateService', () => {
   describe('getTemplateCategories', () => {
     it('should return all template categories', () => {
       const categories = service.getTemplateCategories();
-      
+
       expect(categories).toContain(TemplateCategory.EVENT);
       expect(categories).toContain(TemplateCategory.MAINTENANCE);
       expect(categories).toContain(TemplateCategory.WELCOME);
@@ -746,7 +804,9 @@ describe('AnnouncementTemplateService', () => {
         createdBy: 'admin',
       };
 
-      await expect(service.createTemplate(createDto)).rejects.toThrow('Failed to create template');
+      await expect(service.createTemplate(createDto)).rejects.toThrow(
+        'Failed to create template',
+      );
     });
 
     it('should handle variable replacement errors', async () => {

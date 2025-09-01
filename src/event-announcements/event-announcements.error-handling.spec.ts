@@ -14,7 +14,10 @@ import { AnnouncementNotificationService } from './services/notification.service
 import { AnnouncementTemplateService } from './services/template.service';
 import { AnnouncementsGateway } from './gateways/announcements.gateway';
 import { EventAnnouncement } from './entities/event-announcement.entity';
-import { AnnouncementTemplate, TemplateCategory } from './entities/announcement-template.entity';
+import {
+  AnnouncementTemplate,
+  TemplateCategory,
+} from './entities/announcement-template.entity';
 import { CreateEventAnnouncementDto } from './dto/create-event-announcement.dto';
 import {
   AnnouncementType,
@@ -77,11 +80,21 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
       ],
     }).compile();
 
-    announcementService = module.get<EventAnnouncementsService>(EventAnnouncementsService);
-    templateService = module.get<AnnouncementTemplateService>(AnnouncementTemplateService);
-    analyticsService = module.get<AnnouncementAnalyticsService>(AnnouncementAnalyticsService);
-    cacheService = module.get<AnnouncementCacheService>(AnnouncementCacheService);
-    notificationService = module.get<AnnouncementNotificationService>(AnnouncementNotificationService);
+    announcementService = module.get<EventAnnouncementsService>(
+      EventAnnouncementsService,
+    );
+    templateService = module.get<AnnouncementTemplateService>(
+      AnnouncementTemplateService,
+    );
+    analyticsService = module.get<AnnouncementAnalyticsService>(
+      AnnouncementAnalyticsService,
+    );
+    cacheService = module.get<AnnouncementCacheService>(
+      AnnouncementCacheService,
+    );
+    notificationService = module.get<AnnouncementNotificationService>(
+      AnnouncementNotificationService,
+    );
     gateway = module.get<AnnouncementsGateway>(AnnouncementsGateway);
   });
 
@@ -97,18 +110,19 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
     it('should handle database connection failures gracefully', async () => {
       const createDto: CreateEventAnnouncementDto = {
         title: 'Test Announcement',
-        content: 'Test content with sufficient length for validation requirements.',
+        content:
+          'Test content with sufficient length for validation requirements.',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
       };
 
       mockAnnouncementRepository.save.mockRejectedValue(
-        new Error('Connection to database failed')
+        new Error('Connection to database failed'),
       );
 
       await expect(announcementService.create(createDto)).rejects.toThrow(
-        'Connection to database failed'
+        'Connection to database failed',
       );
     });
 
@@ -120,20 +134,31 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         addOrderBy: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockRejectedValue(
-          new QueryFailedError('SELECT * FROM announcements', [], new Error('Query timeout'))
-        ),
+        getManyAndCount: jest
+          .fn()
+          .mockRejectedValue(
+            new QueryFailedError(
+              'SELECT * FROM announcements',
+              [],
+              new Error('Query timeout'),
+            ),
+          ),
       };
 
-      mockAnnouncementRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      mockAnnouncementRepository.createQueryBuilder.mockReturnValue(
+        queryBuilder,
+      );
 
-      await expect(announcementService.findAll()).rejects.toThrow('Query timeout');
+      await expect(announcementService.findAll()).rejects.toThrow(
+        'Query timeout',
+      );
     });
 
     it('should handle duplicate key constraints', async () => {
       const createDto: CreateEventAnnouncementDto = {
         title: 'Duplicate Test',
-        content: 'Test content with sufficient length for validation requirements.',
+        content:
+          'Test content with sufficient length for validation requirements.',
         slug: 'duplicate-slug',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
@@ -144,19 +169,20 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         new QueryFailedError(
           'INSERT INTO announcements',
           [],
-          new Error('duplicate key value violates unique constraint')
-        )
+          new Error('duplicate key value violates unique constraint'),
+        ),
       );
 
       await expect(announcementService.create(createDto)).rejects.toThrow(
-        'duplicate key value violates unique constraint'
+        'duplicate key value violates unique constraint',
       );
     });
 
     it('should handle foreign key constraint violations', async () => {
       const createDto: CreateEventAnnouncementDto = {
         title: 'Foreign Key Test',
-        content: 'Test content with sufficient length for validation requirements.',
+        content:
+          'Test content with sufficient length for validation requirements.',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         createdBy: 'non-existent-user-id',
@@ -166,12 +192,12 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         new QueryFailedError(
           'INSERT INTO announcements',
           [],
-          new Error('foreign key constraint violation')
-        )
+          new Error('foreign key constraint violation'),
+        ),
       );
 
       await expect(announcementService.create(createDto)).rejects.toThrow(
-        'foreign key constraint violation'
+        'foreign key constraint violation',
       );
     });
   });
@@ -187,14 +213,15 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
       };
 
       await expect(announcementService.create(invalidDto)).rejects.toThrow(
-        BadRequestException
+        BadRequestException,
       );
     });
 
     it('should handle invalid slug format', async () => {
       const createDto: CreateEventAnnouncementDto = {
         title: 'Valid Title For Testing Purposes',
-        content: 'Valid content with sufficient length for validation requirements and testing.',
+        content:
+          'Valid content with sufficient length for validation requirements and testing.',
         slug: 'Invalid Slug With Spaces!',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
@@ -202,14 +229,15 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
       };
 
       await expect(announcementService.create(createDto)).rejects.toThrow(
-        BadRequestException
+        BadRequestException,
       );
     });
 
     it('should handle malicious content injection attempts', async () => {
       const maliciousDto: CreateEventAnnouncementDto = {
         title: 'Test Title<script>alert("XSS")</script>',
-        content: 'Test content<script>alert("XSS")</script><iframe src="evil.com"></iframe>',
+        content:
+          'Test content<script>alert("XSS")</script><iframe src="evil.com"></iframe>',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
@@ -251,7 +279,7 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
       };
 
       await expect(announcementService.create(longDto)).rejects.toThrow(
-        BadRequestException
+        BadRequestException,
       );
     });
   });
@@ -267,13 +295,15 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
       });
 
       const queryResult = {
-        data: [{
-          id: 'test-123',
-          title: 'Test Announcement',
-          content: 'Test content',
-          type: AnnouncementType.GENERAL,
-          priority: AnnouncementPriority.NORMAL,
-        }],
+        data: [
+          {
+            id: 'test-123',
+            title: 'Test Announcement',
+            content: 'Test content',
+            type: AnnouncementType.GENERAL,
+            priority: AnnouncementPriority.NORMAL,
+          },
+        ],
         total: 1,
         page: 1,
         limit: 10,
@@ -289,10 +319,14 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         addOrderBy: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValue([queryResult.data, queryResult.total]),
+        getManyAndCount: jest
+          .fn()
+          .mockResolvedValue([queryResult.data, queryResult.total]),
       };
 
-      mockAnnouncementRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      mockAnnouncementRepository.createQueryBuilder.mockReturnValue(
+        queryBuilder,
+      );
 
       // Should still work despite cache failures
       const result = await announcementService.findAll();
@@ -309,23 +343,21 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
 
       // Mock analytics failure but don't let it propagate
       const originalTrackEngagement = analyticsService.trackEngagement;
-      jest.spyOn(analyticsService, 'trackEngagement').mockImplementation(async () => {
-        // Simulate failure but handle gracefully
-        return Promise.resolve();
-      });
+      jest
+        .spyOn(analyticsService, 'trackEngagement')
+        .mockImplementation(async () => {
+          // Simulate failure but handle gracefully
+          return Promise.resolve();
+        });
 
       // Should not throw
-      await expect(analyticsService.trackEngagement(engagementData)).resolves.not.toThrow();
+      await expect(
+        analyticsService.trackEngagement(engagementData),
+      ).resolves.not.toThrow();
     });
 
     it('should handle notification service failures', async () => {
-      const notificationData = {
-        type: 'new_announcement' as const,
-        announcement: mockAnnouncement,
-        priority: 'medium' as const,
-        targetAudience: ['all'],
-      };
-      
+      // Create mock announcement for notification service
       const mockAnnouncement = {
         id: 'announcement-123',
         title: 'Test Announcement',
@@ -347,8 +379,17 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         updatedAt: new Date(),
       } as any;
 
+      const notificationData = {
+        type: 'new_announcement' as const,
+        announcement: mockAnnouncement,
+        priority: 'medium' as const,
+        targetAudience: ['all'],
+      };
+
       // Should handle gracefully without throwing
-      await expect(notificationService.notifyUsers(notificationData)).resolves.not.toThrow();
+      await expect(
+        notificationService.notifyUsers(notificationData),
+      ).resolves.not.toThrow();
     });
 
     it('should handle gateway broadcast failures', async () => {
@@ -361,8 +402,12 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
       };
 
       // Should handle gracefully without throwing
-      await expect(gateway.broadcastNewAnnouncement(announcement)).resolves.not.toThrow();
-      await expect(gateway.sendFeaturedNotification(announcement)).resolves.not.toThrow();
+      await expect(
+        gateway.broadcastNewAnnouncement(announcement),
+      ).resolves.not.toThrow();
+      await expect(
+        gateway.sendFeaturedNotification(announcement),
+      ).resolves.not.toThrow();
     });
   });
 
@@ -370,43 +415,47 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
     it('should handle announcement not found', async () => {
       mockAnnouncementRepository.findOne.mockResolvedValue(null);
 
-      await expect(announcementService.findOne('non-existent-id')).rejects.toThrow(
-        NotFoundException
-      );
+      await expect(
+        announcementService.findOne('non-existent-id'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should handle template not found', async () => {
       mockTemplateRepository.findOne.mockResolvedValue(null);
 
-      await expect(templateService.findTemplateById('non-existent-id')).rejects.toThrow(
-        NotFoundException
-      );
+      await expect(
+        templateService.findTemplateById('non-existent-id'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should handle template generation with non-existent template', async () => {
       mockTemplateRepository.findOne.mockResolvedValue(null);
 
-      await expect(templateService.generateFromTemplate({
-        templateId: 'non-existent-template',
-        variables: {},
-        createdBy: 'user-123',
-      })).rejects.toThrow(NotFoundException);
+      await expect(
+        templateService.generateFromTemplate({
+          templateId: 'non-existent-template',
+          variables: {},
+          createdBy: 'user-123',
+        }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should handle update of non-existent announcement', async () => {
       mockAnnouncementRepository.findOne.mockResolvedValue(null);
 
-      await expect(announcementService.update('non-existent-id', {
-        title: 'Updated Title',
-      })).rejects.toThrow(NotFoundException);
+      await expect(
+        announcementService.update('non-existent-id', {
+          title: 'Updated Title',
+        }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should handle deletion of non-existent announcement', async () => {
       mockAnnouncementRepository.findOne.mockResolvedValue(null);
 
-      await expect(announcementService.remove('non-existent-id')).rejects.toThrow(
-        NotFoundException
-      );
+      await expect(
+        announcementService.remove('non-existent-id'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -427,11 +476,13 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
 
       mockTemplateRepository.findOne.mockResolvedValue(template);
 
-      await expect(templateService.generateFromTemplate({
-        templateId: template.id,
-        variables: { eventName: 'Test Event' },
-        createdBy: 'user-123',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        templateService.generateFromTemplate({
+          templateId: template.id,
+          variables: { eventName: 'Test Event' },
+          createdBy: 'user-123',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle template with invalid variable types', async () => {
@@ -451,14 +502,16 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
 
       mockTemplateRepository.findOne.mockResolvedValue(template);
 
-      await expect(templateService.generateFromTemplate({
-        templateId: template.id,
-        variables: {
-          eventName: 'Test Event',
-          price: 'not-a-number', // Invalid type
-        },
-        createdBy: 'user-123',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        templateService.generateFromTemplate({
+          templateId: template.id,
+          variables: {
+            eventName: 'Test Event',
+            price: 'not-a-number', // Invalid type
+          },
+          createdBy: 'user-123',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle inactive template usage', async () => {
@@ -475,11 +528,13 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
 
       mockTemplateRepository.findOne.mockResolvedValue(template);
 
-      await expect(templateService.generateFromTemplate({
-        templateId: template.id,
-        variables: {},
-        createdBy: 'user-123',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        templateService.generateFromTemplate({
+          templateId: template.id,
+          variables: {},
+          createdBy: 'user-123',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle system template modification attempts', async () => {
@@ -496,14 +551,16 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
 
       mockTemplateRepository.findOne.mockResolvedValue(systemTemplate);
 
-      await expect(templateService.updateTemplate(systemTemplate.id, {
-        name: 'Modified System Template',
-        updatedBy: 'user-123',
-      })).rejects.toThrow(BadRequestException);
+      await expect(
+        templateService.updateTemplate(systemTemplate.id, {
+          name: 'Modified System Template',
+          updatedBy: 'user-123',
+        }),
+      ).rejects.toThrow(BadRequestException);
 
-      await expect(templateService.deleteTemplate(systemTemplate.id)).rejects.toThrow(
-        BadRequestException
-      );
+      await expect(
+        templateService.deleteTemplate(systemTemplate.id),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -512,7 +569,8 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
       const title = 'Same Title';
       const createDto: CreateEventAnnouncementDto = {
         title,
-        content: 'Test content with sufficient length for validation requirements.',
+        content:
+          'Test content with sufficient length for validation requirements.',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
@@ -549,7 +607,8 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
 
       const createDto: CreateEventAnnouncementDto = {
         title: 'Future Expiry Test',
-        content: 'Test content with sufficient length for validation requirements.',
+        content:
+          'Test content with sufficient length for validation requirements.',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         expireAt: futureDate,
@@ -582,7 +641,8 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
 
       const createDto: CreateEventAnnouncementDto = {
         title: 'Past Event Test',
-        content: 'Test content with sufficient length for validation requirements.',
+        content:
+          'Test content with sufficient length for validation requirements.',
         type: AnnouncementType.EVENT,
         priority: AnnouncementPriority.NORMAL,
         eventDate: pastDate,
@@ -621,7 +681,7 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
 
       // This should fail validation due to short content
       await expect(announcementService.create(createDto)).rejects.toThrow(
-        BadRequestException
+        BadRequestException,
       );
     });
   });
@@ -636,13 +696,15 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         metadata: {
           // Large metadata object
           ...Object.fromEntries(
-            Array.from({ length: 1000 }, (_, i) => [`key${i}`, `value${i}`])
+            Array.from({ length: 1000 }, (_, i) => [`key${i}`, `value${i}`]),
           ),
         },
       };
 
       // Should handle gracefully without memory issues
-      await expect(analyticsService.trackEngagement(largeEngagementData)).resolves.not.toThrow();
+      await expect(
+        analyticsService.trackEngagement(largeEngagementData),
+      ).resolves.not.toThrow();
     });
 
     it('should handle cache eviction under memory pressure', async () => {
@@ -651,7 +713,10 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         const largeData = {
           id: i,
           data: 'x'.repeat(10000), // 10KB per item
-          nested: Array.from({ length: 100 }, (_, j) => ({ id: j, value: `value-${j}` })),
+          nested: Array.from({ length: 100 }, (_, j) => ({
+            id: j,
+            value: `value-${j}`,
+          })),
         };
         cacheService.set(`large-item-${i}`, largeData);
       }
@@ -691,13 +756,15 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
           templateId,
           variables: { title: 'Test', content: 'Test content' },
           createdBy: 'user-123',
-        })
+        }),
       );
 
       await Promise.all(promises);
 
       // Should have incremented usage count for each generation
-      expect(mockTemplateRepository.increment).toHaveBeenCalledTimes(concurrentGenerations);
+      expect(mockTemplateRepository.increment).toHaveBeenCalledTimes(
+        concurrentGenerations,
+      );
     });
   });
 });

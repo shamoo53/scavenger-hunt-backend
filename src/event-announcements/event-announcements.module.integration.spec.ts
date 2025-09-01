@@ -122,7 +122,8 @@ describe('EventAnnouncementsModule Integration Tests', () => {
       // Setup
       const createDto: CreateEventAnnouncementDto = {
         title: 'Integration Test Announcement',
-        content: 'This is a comprehensive test of the announcement lifecycle with enough content to meet validation requirements.',
+        content:
+          'This is a comprehensive test of the announcement lifecycle with enough content to meet validation requirements.',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         category: 'testing',
@@ -195,7 +196,8 @@ describe('EventAnnouncementsModule Integration Tests', () => {
         type: AnnouncementType.EVENT,
         priority: AnnouncementPriority.HIGH,
         titleTemplate: '🎉 {{eventName}} - {{eventDate}}',
-        contentTemplate: 'Join us for {{eventName}} on {{eventDate}} at {{location}}. {{description}}',
+        contentTemplate:
+          'Join us for {{eventName}} on {{eventDate}} at {{location}}. {{description}}',
         variables: {
           eventName: { type: 'string', required: true },
           eventDate: { type: 'string', required: true },
@@ -230,7 +232,8 @@ describe('EventAnnouncementsModule Integration Tests', () => {
         eventName: 'Summer Festival',
         eventDate: '2024-07-15',
         location: 'Central Park',
-        description: 'A fantastic summer event with music, food, and fun activities for the whole family.',
+        description:
+          'A fantastic summer event with music, food, and fun activities for the whole family.',
       };
 
       const generatedDto = await templateService.generateFromTemplate({
@@ -275,7 +278,7 @@ describe('EventAnnouncementsModule Integration Tests', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       } as any;
-      
+
       // Test cache integration
       const cacheKey = 'test-key';
       const testData = { message: 'cached data' };
@@ -331,7 +334,8 @@ describe('EventAnnouncementsModule Integration Tests', () => {
     it('should handle announcement lifecycle with all features', async () => {
       const createDto: CreateEventAnnouncementDto = {
         title: 'Complex Workflow Test Announcement',
-        content: 'This announcement tests the complete workflow including caching, analytics, notifications, and template generation with comprehensive content.',
+        content:
+          'This announcement tests the complete workflow including caching, analytics, notifications, and template generation with comprehensive content.',
         type: AnnouncementType.MAINTENANCE,
         priority: AnnouncementPriority.CRITICAL,
         category: 'system',
@@ -412,7 +416,8 @@ describe('EventAnnouncementsModule Integration Tests', () => {
 
       const scheduledDto: CreateEventAnnouncementDto = {
         title: 'Scheduled Test Announcement',
-        content: 'This announcement is scheduled for future publication and tests the scheduling workflow.',
+        content:
+          'This announcement is scheduled for future publication and tests the scheduling workflow.',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         isPublished: false,
@@ -481,7 +486,8 @@ describe('EventAnnouncementsModule Integration Tests', () => {
     it('should handle database failures gracefully', async () => {
       const createDto: CreateEventAnnouncementDto = {
         title: 'Error Test Announcement',
-        content: 'This tests error handling in the announcement creation process.',
+        content:
+          'This tests error handling in the announcement creation process.',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         createdBy: 'tester',
@@ -521,13 +527,31 @@ describe('EventAnnouncementsModule Integration Tests', () => {
     });
 
     it('should handle notification service failures', async () => {
+      // Create proper mock announcement for notification service
+      const mockAnnouncement = {
+        id: 'announcement-123',
+        title: 'Test Announcement',
+        content: 'Test content',
+        type: AnnouncementType.GENERAL,
+        priority: AnnouncementPriority.NORMAL,
+        status: AnnouncementStatus.PUBLISHED,
+        isActive: true,
+        isPinned: false,
+        isFeatured: false,
+        requiresAcknowledgment: false,
+        isPublished: true,
+        allowComments: true,
+        notifyUsers: false,
+        viewCount: 0,
+        likeCount: 0,
+        shareCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any;
+
       const notificationData = {
         type: 'new_announcement' as const,
-        announcement: {
-          id: 'announcement-123',
-          title: 'Test Announcement',
-          content: 'Test content',
-        },
+        announcement: mockAnnouncement,
         priority: 'high' as const,
         targetAudience: ['all'],
       };
@@ -589,16 +613,16 @@ describe('EventAnnouncementsModule Integration Tests', () => {
         return async () => {
           const key = `performance-test-${i}`;
           const data = { index: i, timestamp: Date.now() };
-          
+
           cacheService.set(key, data);
           const retrieved = cacheService.get(key);
-          
+
           expect(retrieved).toEqual(data);
         };
       });
 
       // Execute all operations concurrently
-      await Promise.all(operations.map(op => op()));
+      await Promise.all(operations.map((op) => op()));
 
       // Verify cache statistics
       const stats = cacheService.getStats();

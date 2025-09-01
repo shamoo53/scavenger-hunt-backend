@@ -20,7 +20,8 @@ describe('Event Announcements Entities', () => {
 
     it('should create a valid announcement entity', async () => {
       announcement.title = 'Test Announcement';
-      announcement.content = 'This is a test announcement with sufficient content length to pass validation.';
+      announcement.content =
+        'This is a test announcement with sufficient content length to pass validation.';
       announcement.type = AnnouncementType.GENERAL;
       announcement.priority = AnnouncementPriority.NORMAL;
       announcement.status = AnnouncementStatus.PUBLISHED;
@@ -37,18 +38,19 @@ describe('Event Announcements Entities', () => {
       const errors = await validate(announcement);
 
       expect(errors.length).toBeGreaterThan(0);
-      const errorProperties = errors.map(error => error.property);
+      const errorProperties = errors.map((error) => error.property);
       expect(errorProperties).toContain('title');
       expect(errorProperties).toContain('content');
     });
 
     it('should validate title length constraints', async () => {
       announcement.title = 'a'.repeat(256); // Exceeds 255 character limit
-      announcement.content = 'Valid content with sufficient length for validation.';
+      announcement.content =
+        'Valid content with sufficient length for validation.';
 
       const errors = await validate(announcement);
-      const titleError = errors.find(error => error.property === 'title');
-      
+      const titleError = errors.find((error) => error.property === 'title');
+
       expect(titleError).toBeDefined();
       expect(titleError?.constraints).toHaveProperty('maxLength');
     });
@@ -58,54 +60,59 @@ describe('Event Announcements Entities', () => {
       announcement.content = 'a'.repeat(5001); // Exceeds 5000 character limit
 
       const errors = await validate(announcement);
-      const contentError = errors.find(error => error.property === 'content');
-      
+      const contentError = errors.find((error) => error.property === 'content');
+
       expect(contentError).toBeDefined();
       expect(contentError?.constraints).toHaveProperty('maxLength');
     });
 
     it('should validate enum fields', async () => {
       announcement.title = 'Valid Title';
-      announcement.content = 'Valid content with sufficient length for validation.';
+      announcement.content =
+        'Valid content with sufficient length for validation.';
       announcement.type = 'INVALID_TYPE' as any;
       announcement.priority = 'INVALID_PRIORITY' as any;
       announcement.status = 'INVALID_STATUS' as any;
 
       const errors = await validate(announcement);
-      
-      const enumErrors = errors.filter(error => 
-        ['type', 'priority', 'status'].includes(error.property)
+
+      const enumErrors = errors.filter((error) =>
+        ['type', 'priority', 'status'].includes(error.property),
       );
       expect(enumErrors.length).toBe(3);
-      
-      enumErrors.forEach(error => {
+
+      enumErrors.forEach((error) => {
         expect(error.constraints).toHaveProperty('isEnum');
       });
     });
 
     it('should validate URL fields', async () => {
       announcement.title = 'Valid Title';
-      announcement.content = 'Valid content with sufficient length for validation.';
+      announcement.content =
+        'Valid content with sufficient length for validation.';
       announcement.eventUrl = 'not-a-valid-url';
       announcement.registrationUrl = 'also-invalid';
       announcement.imageUrl = 'invalid-image-url';
       announcement.bannerUrl = 'invalid-banner-url';
 
       const errors = await validate(announcement);
-      
-      const urlErrors = errors.filter(error => 
-        ['eventUrl', 'registrationUrl', 'imageUrl', 'bannerUrl'].includes(error.property)
+
+      const urlErrors = errors.filter((error) =>
+        ['eventUrl', 'registrationUrl', 'imageUrl', 'bannerUrl'].includes(
+          error.property,
+        ),
       );
       expect(urlErrors.length).toBeGreaterThan(0);
-      
-      urlErrors.forEach(error => {
+
+      urlErrors.forEach((error) => {
         expect(error.constraints).toHaveProperty('isUrl');
       });
     });
 
     it('should validate boolean fields default values', () => {
       announcement.title = 'Valid Title';
-      announcement.content = 'Valid content with sufficient length for validation.';
+      announcement.content =
+        'Valid content with sufficient length for validation.';
 
       // Test default values
       expect(announcement.isActive).toBeUndefined(); // Will be set by database default
@@ -124,18 +131,19 @@ describe('Event Announcements Entities', () => {
 
     it('should validate array fields', async () => {
       announcement.title = 'Valid Title';
-      announcement.content = 'Valid content with sufficient length for validation.';
+      announcement.content =
+        'Valid content with sufficient length for validation.';
       announcement.targetAudience = ['all', 'students', 'faculty'];
       announcement.tags = ['important', 'event', 'notification'];
       announcement.categories = ['academic', 'administrative'];
 
       const errors = await validate(announcement);
-      
+
       // Filter out errors not related to our test fields
-      const arrayFieldErrors = errors.filter(error => 
-        ['targetAudience', 'tags', 'categories'].includes(error.property)
+      const arrayFieldErrors = errors.filter((error) =>
+        ['targetAudience', 'tags', 'categories'].includes(error.property),
       );
-      
+
       expect(arrayFieldErrors).toHaveLength(0);
       expect(Array.isArray(announcement.targetAudience)).toBe(true);
       expect(Array.isArray(announcement.tags)).toBe(true);
@@ -144,11 +152,12 @@ describe('Event Announcements Entities', () => {
 
     it('should validate date fields', () => {
       announcement.title = 'Valid Title';
-      announcement.content = 'Valid content with sufficient length for validation.';
-      
+      announcement.content =
+        'Valid content with sufficient length for validation.';
+
       const now = new Date();
       const future = new Date(now.getTime() + 86400000); // +1 day
-      
+
       announcement.startDate = now;
       announcement.endDate = future;
       announcement.eventDate = future;
@@ -166,18 +175,21 @@ describe('Event Announcements Entities', () => {
 
     it('should validate numeric fields', async () => {
       announcement.title = 'Valid Title';
-      announcement.content = 'Valid content with sufficient length for validation.';
+      announcement.content =
+        'Valid content with sufficient length for validation.';
       announcement.maxParticipants = 100;
       announcement.viewCount = 0;
       announcement.likeCount = 0;
       announcement.shareCount = 0;
 
       const errors = await validate(announcement);
-      
-      const numericFieldErrors = errors.filter(error => 
-        ['maxParticipants', 'viewCount', 'likeCount', 'shareCount'].includes(error.property)
+
+      const numericFieldErrors = errors.filter((error) =>
+        ['maxParticipants', 'viewCount', 'likeCount', 'shareCount'].includes(
+          error.property,
+        ),
       );
-      
+
       expect(numericFieldErrors).toHaveLength(0);
       expect(typeof announcement.maxParticipants).toBe('number');
       expect(announcement.maxParticipants).toBeGreaterThanOrEqual(0);
@@ -185,12 +197,15 @@ describe('Event Announcements Entities', () => {
 
     it('should fail validation for negative numeric values where applicable', async () => {
       announcement.title = 'Valid Title';
-      announcement.content = 'Valid content with sufficient length for validation.';
+      announcement.content =
+        'Valid content with sufficient length for validation.';
       announcement.maxParticipants = -1; // Should fail min validation
 
       const errors = await validate(announcement);
-      const maxParticipantsError = errors.find(error => error.property === 'maxParticipants');
-      
+      const maxParticipantsError = errors.find(
+        (error) => error.property === 'maxParticipants',
+      );
+
       if (maxParticipantsError) {
         expect(maxParticipantsError.constraints).toHaveProperty('min');
       }
@@ -198,12 +213,15 @@ describe('Event Announcements Entities', () => {
 
     it('should validate UUID fields', async () => {
       announcement.title = 'Valid Title';
-      announcement.content = 'Valid content with sufficient length for validation.';
+      announcement.content =
+        'Valid content with sufficient length for validation.';
       announcement.createdBy = 'invalid-uuid';
 
       const errors = await validate(announcement);
-      const createdByError = errors.find(error => error.property === 'createdBy');
-      
+      const createdByError = errors.find(
+        (error) => error.property === 'createdBy',
+      );
+
       if (createdByError) {
         expect(createdByError.constraints).toHaveProperty('isUuid');
       }
@@ -211,22 +229,28 @@ describe('Event Announcements Entities', () => {
       // Test with valid UUID
       announcement.createdBy = '123e4567-e89b-12d3-a456-426614174000';
       const errorsWithValidUuid = await validate(announcement);
-      const validUuidError = errorsWithValidUuid.find(error => error.property === 'createdBy');
+      const validUuidError = errorsWithValidUuid.find(
+        (error) => error.property === 'createdBy',
+      );
       expect(validUuidError).toBeUndefined();
     });
 
     it('should handle optional fields correctly', async () => {
       announcement.title = 'Valid Title';
-      announcement.content = 'Valid content with sufficient length for validation.';
-      
+      announcement.content =
+        'Valid content with sufficient length for validation.';
+
       // All optional fields should be undefined or null and still pass validation
       const errors = await validate(announcement);
-      
+
       // Filter for only the required field errors
-      const requiredFieldErrors = errors.filter(error => 
-        !['summary', 'category', 'author', 'eventUrl', 'location'].includes(error.property)
+      const requiredFieldErrors = errors.filter(
+        (error) =>
+          !['summary', 'category', 'author', 'eventUrl', 'location'].includes(
+            error.property,
+          ),
       );
-      
+
       expect(announcement.summary).toBeUndefined();
       expect(announcement.category).toBeUndefined();
       expect(announcement.author).toBeUndefined();
@@ -261,7 +285,7 @@ describe('Event Announcements Entities', () => {
       const errors = await validate(template);
 
       expect(errors.length).toBeGreaterThan(0);
-      const errorProperties = errors.map(error => error.property);
+      const errorProperties = errors.map((error) => error.property);
       expect(errorProperties).toContain('name');
       expect(errorProperties).toContain('titleTemplate');
       expect(errorProperties).toContain('contentTemplate');
@@ -273,8 +297,8 @@ describe('Event Announcements Entities', () => {
       template.contentTemplate = 'Valid content template';
 
       const errors = await validate(template);
-      const nameError = errors.find(error => error.property === 'name');
-      
+      const nameError = errors.find((error) => error.property === 'name');
+
       expect(nameError).toBeDefined();
       expect(nameError?.constraints).toHaveProperty('maxLength');
     });
@@ -286,8 +310,10 @@ describe('Event Announcements Entities', () => {
       template.description = 'a'.repeat(501); // Exceeds 500 character limit
 
       const errors = await validate(template);
-      const descriptionError = errors.find(error => error.property === 'description');
-      
+      const descriptionError = errors.find(
+        (error) => error.property === 'description',
+      );
+
       expect(descriptionError).toBeDefined();
       expect(descriptionError?.constraints).toHaveProperty('maxLength');
     });
@@ -301,13 +327,13 @@ describe('Event Announcements Entities', () => {
       template.priority = 'INVALID_PRIORITY' as any;
 
       const errors = await validate(template);
-      
-      const enumErrors = errors.filter(error => 
-        ['category', 'type', 'priority'].includes(error.property)
+
+      const enumErrors = errors.filter((error) =>
+        ['category', 'type', 'priority'].includes(error.property),
       );
       expect(enumErrors.length).toBe(3);
-      
-      enumErrors.forEach(error => {
+
+      enumErrors.forEach((error) => {
         expect(error.constraints).toHaveProperty('isEnum');
       });
     });
@@ -320,11 +346,11 @@ describe('Event Announcements Entities', () => {
       template.isSystem = false;
 
       const errors = await validate(template);
-      
-      const booleanFieldErrors = errors.filter(error => 
-        ['isActive', 'isSystem'].includes(error.property)
+
+      const booleanFieldErrors = errors.filter((error) =>
+        ['isActive', 'isSystem'].includes(error.property),
       );
-      
+
       expect(booleanFieldErrors).toHaveLength(0);
       expect(typeof template.isActive).toBe('boolean');
       expect(typeof template.isSystem).toBe('boolean');
@@ -376,11 +402,11 @@ describe('Event Announcements Entities', () => {
       template.tags = ['template', 'event', 'notification'];
 
       const errors = await validate(template);
-      
-      const arrayFieldErrors = errors.filter(error => 
-        error.property === 'tags'
+
+      const arrayFieldErrors = errors.filter(
+        (error) => error.property === 'tags',
       );
-      
+
       expect(arrayFieldErrors).toHaveLength(0);
       expect(Array.isArray(template.tags)).toBe(true);
       expect(template.tags).toHaveLength(3);
@@ -394,13 +420,13 @@ describe('Event Announcements Entities', () => {
       template.updatedBy = 'a'.repeat(101); // Exceeds 100 character limit
 
       const errors = await validate(template);
-      
-      const userFieldErrors = errors.filter(error => 
-        ['createdBy', 'updatedBy'].includes(error.property)
+
+      const userFieldErrors = errors.filter((error) =>
+        ['createdBy', 'updatedBy'].includes(error.property),
       );
-      
+
       if (userFieldErrors.length > 0) {
-        userFieldErrors.forEach(error => {
+        userFieldErrors.forEach((error) => {
           expect(error.constraints).toHaveProperty('maxLength');
         });
       }
@@ -509,7 +535,7 @@ describe('Event Announcements Entities', () => {
     it('should handle announcement and template relationship concepts', () => {
       // While these entities don't have direct relationships,
       // they work together in the template generation process
-      
+
       const template = new AnnouncementTemplate();
       template.name = 'Event Template';
       template.titleTemplate = '{{eventName}} - {{eventDate}}';

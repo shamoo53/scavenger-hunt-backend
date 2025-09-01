@@ -1,6 +1,9 @@
 import { Repository } from 'typeorm';
 import { EventAnnouncement } from '../entities/event-announcement.entity';
-import { AnnouncementTemplate, TemplateCategory } from '../entities/announcement-template.entity';
+import {
+  AnnouncementTemplate,
+  TemplateCategory,
+} from '../entities/announcement-template.entity';
 import { CreateEventAnnouncementDto } from '../dto/create-event-announcement.dto';
 import {
   AnnouncementType,
@@ -13,11 +16,14 @@ import { UserEngagementData } from '../services/analytics.service';
  * Test data factory for creating mock announcements
  */
 export class AnnouncementTestDataFactory {
-  static createMockAnnouncement(overrides: Partial<EventAnnouncement> = {}): EventAnnouncement {
+  static createMockAnnouncement(
+    overrides: Partial<EventAnnouncement> = {},
+  ): EventAnnouncement {
     const defaultAnnouncement: EventAnnouncement = {
       id: 'test-announcement-' + Date.now(),
       title: 'Test Announcement',
-      content: 'This is a test announcement with sufficient content length for validation purposes.',
+      content:
+        'This is a test announcement with sufficient content length for validation purposes.',
       summary: 'Test announcement summary',
       type: AnnouncementType.GENERAL,
       priority: AnnouncementPriority.NORMAL,
@@ -59,10 +65,13 @@ export class AnnouncementTestDataFactory {
     return defaultAnnouncement;
   }
 
-  static createMockAnnouncementDto(overrides: Partial<CreateEventAnnouncementDto> = {}): CreateEventAnnouncementDto {
+  static createMockAnnouncementDto(
+    overrides: Partial<CreateEventAnnouncementDto> = {},
+  ): CreateEventAnnouncementDto {
     return {
       title: 'Test Announcement DTO',
-      content: 'This is a test announcement DTO with sufficient content length for validation purposes.',
+      content:
+        'This is a test announcement DTO with sufficient content length for validation purposes.',
       type: AnnouncementType.GENERAL,
       priority: AnnouncementPriority.NORMAL,
       status: AnnouncementStatus.PUBLISHED,
@@ -73,7 +82,9 @@ export class AnnouncementTestDataFactory {
     };
   }
 
-  static createMockTemplate(overrides: Partial<AnnouncementTemplate> = {}): AnnouncementTemplate {
+  static createMockTemplate(
+    overrides: Partial<AnnouncementTemplate> = {},
+  ): AnnouncementTemplate {
     return {
       id: 'test-template-' + Date.now(),
       name: 'Test Template',
@@ -82,11 +93,20 @@ export class AnnouncementTestDataFactory {
       type: AnnouncementType.EVENT,
       priority: AnnouncementPriority.NORMAL,
       titleTemplate: 'Event: {{eventName}}',
-      contentTemplate: 'Join us for {{eventName}} on {{eventDate}} at {{location}}.',
+      contentTemplate:
+        'Join us for {{eventName}} on {{eventDate}} at {{location}}.',
       variables: {
-        eventName: { type: 'string', required: true, description: 'Name of the event' },
+        eventName: {
+          type: 'string',
+          required: true,
+          description: 'Name of the event',
+        },
         eventDate: { type: 'date', required: true, description: 'Event date' },
-        location: { type: 'string', required: true, description: 'Event location' },
+        location: {
+          type: 'string',
+          required: true,
+          description: 'Event location',
+        },
       },
       defaultSettings: {
         isActive: true,
@@ -108,12 +128,13 @@ export class AnnouncementTestDataFactory {
     };
   }
 
-  static createMockEngagementData(overrides: Partial<UserEngagementData> = {}): UserEngagementData {
+  static createMockEngagementData(
+    overrides: Partial<UserEngagementData> = {},
+  ): UserEngagementData {
     return {
       userId: 'test-user-' + Date.now(),
       announcementId: 'test-announcement-' + Date.now(),
       action: 'view',
-      timestamp: new Date(),
       timestamp: new Date(),
       metadata: {
         source: 'test',
@@ -126,7 +147,10 @@ export class AnnouncementTestDataFactory {
     };
   }
 
-  static createBulkAnnouncements(count: number, baseOverrides: Partial<EventAnnouncement> = {}): EventAnnouncement[] {
+  static createBulkAnnouncements(
+    count: number,
+    baseOverrides: Partial<EventAnnouncement> = {},
+  ): EventAnnouncement[] {
     return Array.from({ length: count }, (_, i) =>
       this.createMockAnnouncement({
         id: `bulk-announcement-${i}`,
@@ -134,11 +158,14 @@ export class AnnouncementTestDataFactory {
         content: `This is bulk announcement number ${i + 1} with sufficient content for validation.`,
         slug: `bulk-announcement-${i}`,
         ...baseOverrides,
-      })
+      }),
     );
   }
 
-  static createBulkTemplates(count: number, baseOverrides: Partial<AnnouncementTemplate> = {}): AnnouncementTemplate[] {
+  static createBulkTemplates(
+    count: number,
+    baseOverrides: Partial<AnnouncementTemplate> = {},
+  ): AnnouncementTemplate[] {
     return Array.from({ length: count }, (_, i) =>
       this.createMockTemplate({
         id: `bulk-template-${i}`,
@@ -146,11 +173,14 @@ export class AnnouncementTestDataFactory {
         titleTemplate: `Template ${i + 1}: {{title}}`,
         contentTemplate: `This is template ${i + 1} content: {{content}}`,
         ...baseOverrides,
-      })
+      }),
     );
   }
 
-  static createBulkEngagementData(count: number, baseOverrides: Partial<UserEngagementData> = {}): UserEngagementData[] {
+  static createBulkEngagementData(
+    count: number,
+    baseOverrides: Partial<UserEngagementData> = {},
+  ): UserEngagementData[] {
     const actions = ['view', 'like', 'share', 'click', 'acknowledge'] as const;
     return Array.from({ length: count }, (_, i) =>
       this.createMockEngagementData({
@@ -158,7 +188,7 @@ export class AnnouncementTestDataFactory {
         announcementId: `bulk-announcement-${i % 5}`, // 5 different announcements
         action: actions[i % actions.length],
         ...baseOverrides,
-      })
+      }),
     );
   }
 }
@@ -167,200 +197,48 @@ export class AnnouncementTestDataFactory {
  * Mock repository factory for creating consistent mock repositories
  */
 export class MockRepositoryFactory {
-  static createMockAnnouncementRepository(): jest.Mocked<Repository<EventAnnouncement>> {
+  static createMockAnnouncementRepository(): any {
     return {
       create: jest.fn(),
       save: jest.fn(),
       find: jest.fn(),
       findOne: jest.fn(),
-      findOneBy: jest.fn(),
-      findOneOrFail: jest.fn(),
       update: jest.fn(),
-      delete: jest.fn(),
       remove: jest.fn(),
       softDelete: jest.fn(),
-      softRemove: jest.fn(),
-      restore: jest.fn(),
       count: jest.fn(),
-      countBy: jest.fn(),
       sum: jest.fn(),
-      average: jest.fn(),
-      minimum: jest.fn(),
-      maximum: jest.fn(),
       increment: jest.fn(),
-      decrement: jest.fn(),
-      insert: jest.fn(),
-      upsert: jest.fn(),
-      exist: jest.fn(),
-      existsBy: jest.fn(),
-      findAndCount: jest.fn(),
-      findAndCountBy: jest.fn(),
-      findBy: jest.fn(),
-      findByIds: jest.fn(),
-      clear: jest.fn(),
-      getId: jest.fn(),
-      hasId: jest.fn(),
-      merge: jest.fn(),
-      preload: jest.fn(),
-      query: jest.fn(),
-      recover: jest.fn(),
-      reload: jest.fn(),
       createQueryBuilder: jest.fn(() => ({
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
-        orWhere: jest.fn().mockReturnThis(),
-        whereInIds: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         addOrderBy: jest.fn().mockReturnThis(),
-        groupBy: jest.fn().mockReturnThis(),
-        addGroupBy: jest.fn().mockReturnThis(),
-        having: jest.fn().mockReturnThis(),
-        andHaving: jest.fn().mockReturnThis(),
-        orHaving: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        offset: jest.fn().mockReturnThis(),
-        innerJoin: jest.fn().mockReturnThis(),
-        leftJoin: jest.fn().mockReturnThis(),
-        innerJoinAndSelect: jest.fn().mockReturnThis(),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        loadRelationCountAndMap: jest.fn().mockReturnThis(),
-        loadRelationIdAndMap: jest.fn().mockReturnThis(),
-        cache: jest.fn().mockReturnThis(),
-        setParameters: jest.fn().mockReturnThis(),
-        setParameter: jest.fn().mockReturnThis(),
-        getQuery: jest.fn(),
-        getQueryAndParameters: jest.fn(),
-        getSql: jest.fn(),
-        printSql: jest.fn(),
-        execute: jest.fn(),
-        stream: jest.fn(),
-        getRawOne: jest.fn(),
-        getRawMany: jest.fn(),
-        getOne: jest.fn(),
-        getOneOrFail: jest.fn(),
-        getMany: jest.fn(),
         getManyAndCount: jest.fn(),
-        getCount: jest.fn(),
-        getRawAndEntities: jest.fn(),
-        clone: jest.fn(),
-        disableEscaping: jest.fn().mockReturnThis(),
-        getExists: jest.fn(),
-        relation: jest.fn(),
-        of: jest.fn(),
-        set: jest.fn(),
-        add: jest.fn(),
-        addAndRemove: jest.fn(),
-        remove: jest.fn(),
-        loadMany: jest.fn(),
-        loadOne: jest.fn(),
+        getMany: jest.fn(),
       })),
-      manager: {} as any,
-      metadata: {} as any,
-      target: EventAnnouncement,
-      queryRunner: undefined,
-    return {} as jest.Mocked<Repository<EventAnnouncement>>;
+    };
   }
 
-  static createMockTemplateRepository(): jest.Mocked<Repository<AnnouncementTemplate>> {
+  static createMockTemplateRepository(): any {
     return {
       create: jest.fn(),
       save: jest.fn(),
       find: jest.fn(),
       findOne: jest.fn(),
-      findOneBy: jest.fn(),
-      findOneOrFail: jest.fn(),
       update: jest.fn(),
-      delete: jest.fn(),
       remove: jest.fn(),
-      softDelete: jest.fn(),
-      softRemove: jest.fn(),
-      restore: jest.fn(),
-      count: jest.fn(),
-      countBy: jest.fn(),
-      sum: jest.fn(),
-      average: jest.fn(),
-      minimum: jest.fn(),
-      maximum: jest.fn(),
       increment: jest.fn(),
-      decrement: jest.fn(),
-      insert: jest.fn(),
-      upsert: jest.fn(),
-      exist: jest.fn(),
-      existsBy: jest.fn(),
-      findAndCount: jest.fn(),
-      findAndCountBy: jest.fn(),
-      findBy: jest.fn(),
-      findByIds: jest.fn(),
-      clear: jest.fn(),
-      getId: jest.fn(),
-      hasId: jest.fn(),
-      merge: jest.fn(),
-      preload: jest.fn(),
-      query: jest.fn(),
-      recover: jest.fn(),
-      reload: jest.fn(),
       createQueryBuilder: jest.fn(() => ({
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
-        orWhere: jest.fn().mockReturnThis(),
-        whereInIds: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         addOrderBy: jest.fn().mockReturnThis(),
-        groupBy: jest.fn().mockReturnThis(),
-        addGroupBy: jest.fn().mockReturnThis(),
-        having: jest.fn().mockReturnThis(),
-        andHaving: jest.fn().mockReturnThis(),
-        orHaving: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        offset: jest.fn().mockReturnThis(),
-        innerJoin: jest.fn().mockReturnThis(),
-        leftJoin: jest.fn().mockReturnThis(),
-        innerJoinAndSelect: jest.fn().mockReturnThis(),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        loadRelationCountAndMap: jest.fn().mockReturnThis(),
-        loadRelationIdAndMap: jest.fn().mockReturnThis(),
-        cache: jest.fn().mockReturnThis(),
-        setParameters: jest.fn().mockReturnThis(),
-        setParameter: jest.fn().mockReturnThis(),
-        getQuery: jest.fn(),
-        getQueryAndParameters: jest.fn(),
-        getSql: jest.fn(),
-        printSql: jest.fn(),
-        execute: jest.fn(),
-        stream: jest.fn(),
-        getRawOne: jest.fn(),
-        getRawMany: jest.fn(),
-        getOne: jest.fn(),
-        getOneOrFail: jest.fn(),
         getMany: jest.fn(),
-        getManyAndCount: jest.fn(),
-        getCount: jest.fn(),
-        getRawAndEntities: jest.fn(),
-        clone: jest.fn(),
-        disableEscaping: jest.fn().mockReturnThis(),
-        getExists: jest.fn(),
-        relation: jest.fn(),
-        of: jest.fn(),
-        set: jest.fn(),
-        add: jest.fn(),
-        addAndRemove: jest.fn(),
-        remove: jest.fn(),
-        loadMany: jest.fn(),
-        loadOne: jest.fn(),
       })),
-      manager: {} as any,
-      metadata: {} as any,
-      target: AnnouncementTemplate,
-      queryRunner: undefined,
-    return {} as jest.Mocked<Repository<AnnouncementTemplate>>;
+    };
   }
 }
 
@@ -397,7 +275,9 @@ export class TestAssertionHelpers {
     expect(data.userId).toBeDefined();
     expect(data.announcementId).toBeDefined();
     expect(data.action).toBeDefined();
-    expect(['view', 'like', 'share', 'click', 'acknowledge']).toContain(data.action);
+    expect(['view', 'like', 'share', 'click', 'acknowledge']).toContain(
+      data.action,
+    );
   }
 
   static assertPaginationResponse(response: any, expectedTotal?: number): void {
@@ -414,17 +294,29 @@ export class TestAssertionHelpers {
       expect(response.total).toBe(expectedTotal);
     }
 
-    expect(response.totalPages).toBe(Math.ceil(response.total / response.limit));
-    expect(response.hasNext).toBe(response.page * response.limit < response.total);
+    expect(response.totalPages).toBe(
+      Math.ceil(response.total / response.limit),
+    );
+    expect(response.hasNext).toBe(
+      response.page * response.limit < response.total,
+    );
     expect(response.hasPrevious).toBe(response.page > 1);
   }
 
-  static assertPerformanceMetrics(duration: number, maxDuration: number, operationName: string): void {
+  static assertPerformanceMetrics(
+    duration: number,
+    maxDuration: number,
+    operationName: string,
+  ): void {
     expect(duration).toBeLessThan(maxDuration);
     if (duration > maxDuration * 0.8) {
-      console.warn(`⚠️  Performance warning: ${operationName} took ${duration}ms (close to limit of ${maxDuration}ms)`);
+      console.warn(
+        `⚠️  Performance warning: ${operationName} took ${duration}ms (close to limit of ${maxDuration}ms)`,
+      );
     } else {
-      console.log(`✅ Performance check passed: ${operationName} took ${duration}ms`);
+      console.log(
+        `✅ Performance check passed: ${operationName} took ${duration}ms`,
+      );
     }
   }
 
@@ -530,12 +422,20 @@ export class StressTestDataGenerator {
         rules: { type: 'string', required: false },
         prizes: { type: 'string', required: false },
         contactEmail: { type: 'email', required: true },
-        signature: { type: 'string', required: false, defaultValue: 'Best regards,' },
+        signature: {
+          type: 'string',
+          required: false,
+          defaultValue: 'Best regards,',
+        },
       },
     };
   }
 
-  static generateMassEngagementData(userCount: number, announcementCount: number, actionsPerUser: number): UserEngagementData[] {
+  static generateMassEngagementData(
+    userCount: number,
+    announcementCount: number,
+    actionsPerUser: number,
+  ): UserEngagementData[] {
     const actions = ['view', 'like', 'share', 'click', 'acknowledge'] as const;
     const data: UserEngagementData[] = [];
 
@@ -609,8 +509,14 @@ export class PerformanceMeasurement {
     return { count, min, max, average, median, p95 };
   }
 
-  static getAllStatistics(): Record<string, ReturnType<typeof PerformanceMeasurement.getStatistics>> {
-    const result: Record<string, ReturnType<typeof PerformanceMeasurement.getStatistics>> = {};
+  static getAllStatistics(): Record<
+    string,
+    ReturnType<typeof PerformanceMeasurement.getStatistics>
+  > {
+    const result: Record<
+      string,
+      ReturnType<typeof PerformanceMeasurement.getStatistics>
+    > = {};
     for (const [name] of this.measurements) {
       result[name] = this.getStatistics(name);
     }
@@ -623,8 +529,8 @@ export class PerformanceMeasurement {
 
   static printReport(): void {
     console.log('\n📊 Performance Report:');
-    console.log('=' .repeat(60));
-    
+    console.log('='.repeat(60));
+
     for (const [name, stats] of Object.entries(this.getAllStatistics())) {
       if (stats) {
         console.log(`\n${name}:`);
@@ -636,7 +542,7 @@ export class PerformanceMeasurement {
         console.log(`  95th Percentile: ${stats.p95.toFixed(2)}ms`);
       }
     }
-    
-    console.log('=' .repeat(60));
+
+    console.log('='.repeat(60));
   }
 }

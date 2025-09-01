@@ -4,7 +4,10 @@ import { AnnouncementTemplatesController } from './templates.controller';
 import { AnnouncementTemplateService } from '../services/template.service';
 import { EventAnnouncementsService } from '../event-announcements.service';
 import { TemplateCategory } from '../entities/announcement-template.entity';
-import { AnnouncementType, AnnouncementPriority } from '../enums/announcement.enum';
+import {
+  AnnouncementType,
+  AnnouncementPriority,
+} from '../enums/announcement.enum';
 import {
   CreateTemplateDto,
   UpdateTemplateDto,
@@ -52,9 +55,15 @@ describe('AnnouncementTemplatesController', () => {
       ],
     }).compile();
 
-    controller = module.get<AnnouncementTemplatesController>(AnnouncementTemplatesController);
-    templateService = module.get<AnnouncementTemplateService>(AnnouncementTemplateService);
-    announcementsService = module.get<EventAnnouncementsService>(EventAnnouncementsService);
+    controller = module.get<AnnouncementTemplatesController>(
+      AnnouncementTemplatesController,
+    );
+    templateService = module.get<AnnouncementTemplateService>(
+      AnnouncementTemplateService,
+    );
+    announcementsService = module.get<EventAnnouncementsService>(
+      EventAnnouncementsService,
+    );
 
     // Reset all mocks
     Object.values(mockTemplateService).forEach((mock) => mock.mockClear());
@@ -98,7 +107,9 @@ describe('AnnouncementTemplatesController', () => {
 
       const result = await controller.createTemplate(createDto);
 
-      expect(mockTemplateService.createTemplate).toHaveBeenCalledWith(createDto);
+      expect(mockTemplateService.createTemplate).toHaveBeenCalledWith(
+        createDto,
+      );
       expect(result).toEqual(mockResult);
     });
 
@@ -114,11 +125,12 @@ describe('AnnouncementTemplatesController', () => {
       };
 
       mockTemplateService.createTemplate.mockRejectedValue(
-        new BadRequestException('Invalid template data')
+        new BadRequestException('Invalid template data'),
       );
 
-      await expect(controller.createTemplate(createDto))
-        .rejects.toThrow(BadRequestException);
+      await expect(controller.createTemplate(createDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -149,7 +161,9 @@ describe('AnnouncementTemplatesController', () => {
 
       const result = await controller.findAllTemplates(queryDto);
 
-      expect(mockTemplateService.findAllTemplates).toHaveBeenCalledWith(queryDto);
+      expect(mockTemplateService.findAllTemplates).toHaveBeenCalledWith(
+        queryDto,
+      );
       expect(result).toEqual(mockTemplates);
     });
 
@@ -291,7 +305,7 @@ describe('AnnouncementTemplatesController', () => {
 
       expect(mockTemplateService.previewTemplate).toHaveBeenCalledWith(
         'template-123',
-        previewDto.variables
+        previewDto.variables,
       );
       expect(result).toEqual(mockPreview);
     });
@@ -303,11 +317,12 @@ describe('AnnouncementTemplatesController', () => {
       };
 
       mockTemplateService.previewTemplate.mockRejectedValue(
-        new NotFoundException('Template not found')
+        new NotFoundException('Template not found'),
       );
 
-      await expect(controller.previewTemplate(previewDto))
-        .rejects.toThrow(NotFoundException);
+      await expect(controller.previewTemplate(previewDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -342,13 +357,21 @@ describe('AnnouncementTemplatesController', () => {
         updatedAt: new Date(),
       };
 
-      mockTemplateService.generateFromTemplate.mockResolvedValue(mockAnnouncementDto);
-      mockAnnouncementsService.create.mockResolvedValue(mockCreatedAnnouncement);
+      mockTemplateService.generateFromTemplate.mockResolvedValue(
+        mockAnnouncementDto,
+      );
+      mockAnnouncementsService.create.mockResolvedValue(
+        mockCreatedAnnouncement,
+      );
 
       const result = await controller.generateFromTemplate(generateDto);
 
-      expect(mockTemplateService.generateFromTemplate).toHaveBeenCalledWith(generateDto);
-      expect(mockAnnouncementsService.create).toHaveBeenCalledWith(mockAnnouncementDto);
+      expect(mockTemplateService.generateFromTemplate).toHaveBeenCalledWith(
+        generateDto,
+      );
+      expect(mockAnnouncementsService.create).toHaveBeenCalledWith(
+        mockAnnouncementDto,
+      );
       expect(result).toEqual(mockCreatedAnnouncement);
     });
 
@@ -360,11 +383,12 @@ describe('AnnouncementTemplatesController', () => {
       };
 
       mockTemplateService.generateFromTemplate.mockRejectedValue(
-        new BadRequestException('Invalid variables')
+        new BadRequestException('Invalid variables'),
       );
 
-      await expect(controller.generateFromTemplate(generateDto))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        controller.generateFromTemplate(generateDto),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -385,12 +409,15 @@ describe('AnnouncementTemplatesController', () => {
 
       mockTemplateService.cloneTemplate.mockResolvedValue(mockClonedTemplate);
 
-      const result = await controller.cloneTemplate('template-original', cloneDto);
+      const result = await controller.cloneTemplate(
+        'template-original',
+        cloneDto,
+      );
 
       expect(mockTemplateService.cloneTemplate).toHaveBeenCalledWith(
         'template-original',
         'Cloned Event Template',
-        'admin-789'
+        'admin-789',
       );
       expect(result).toEqual(mockClonedTemplate);
     });
@@ -402,11 +429,12 @@ describe('AnnouncementTemplatesController', () => {
       };
 
       mockTemplateService.cloneTemplate.mockRejectedValue(
-        new BadRequestException('Template name already exists')
+        new BadRequestException('Template name already exists'),
       );
 
-      await expect(controller.cloneTemplate('template-123', cloneDto))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        controller.cloneTemplate('template-123', cloneDto),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -423,17 +451,20 @@ describe('AnnouncementTemplatesController', () => {
 
       const result = await controller.findTemplate('template-123');
 
-      expect(mockTemplateService.findTemplateById).toHaveBeenCalledWith('template-123');
+      expect(mockTemplateService.findTemplateById).toHaveBeenCalledWith(
+        'template-123',
+      );
       expect(result).toEqual(mockTemplate);
     });
 
     it('should handle not found errors', async () => {
       mockTemplateService.findTemplateById.mockRejectedValue(
-        new NotFoundException('Template not found')
+        new NotFoundException('Template not found'),
       );
 
-      await expect(controller.findTemplate('non-existent'))
-        .rejects.toThrow(NotFoundException);
+      await expect(controller.findTemplate('non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -459,7 +490,10 @@ describe('AnnouncementTemplatesController', () => {
 
       const result = await controller.updateTemplate('template-123', updateDto);
 
-      expect(mockTemplateService.updateTemplate).toHaveBeenCalledWith('template-123', updateDto);
+      expect(mockTemplateService.updateTemplate).toHaveBeenCalledWith(
+        'template-123',
+        updateDto,
+      );
       expect(result).toEqual(mockUpdatedTemplate);
     });
 
@@ -470,11 +504,12 @@ describe('AnnouncementTemplatesController', () => {
       };
 
       mockTemplateService.updateTemplate.mockRejectedValue(
-        new BadRequestException('Cannot update system template')
+        new BadRequestException('Cannot update system template'),
       );
 
-      await expect(controller.updateTemplate('template-123', updateDto))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        controller.updateTemplate('template-123', updateDto),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -484,22 +519,27 @@ describe('AnnouncementTemplatesController', () => {
 
       await controller.deleteTemplate('template-123');
 
-      expect(mockTemplateService.deleteTemplate).toHaveBeenCalledWith('template-123');
+      expect(mockTemplateService.deleteTemplate).toHaveBeenCalledWith(
+        'template-123',
+      );
     });
 
     it('should handle delete errors', async () => {
       mockTemplateService.deleteTemplate.mockRejectedValue(
-        new BadRequestException('Cannot delete system template')
+        new BadRequestException('Cannot delete system template'),
       );
 
-      await expect(controller.deleteTemplate('system-template'))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        controller.deleteTemplate('system-template'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('initializeSystemTemplates', () => {
     it('should initialize system templates', async () => {
-      mockTemplateService.initializeSystemTemplates.mockResolvedValue(undefined);
+      mockTemplateService.initializeSystemTemplates.mockResolvedValue(
+        undefined,
+      );
 
       await controller.initializeSystemTemplates();
 
@@ -508,11 +548,12 @@ describe('AnnouncementTemplatesController', () => {
 
     it('should handle initialization errors', async () => {
       mockTemplateService.initializeSystemTemplates.mockRejectedValue(
-        new Error('Database connection failed')
+        new Error('Database connection failed'),
       );
 
-      await expect(controller.initializeSystemTemplates())
-        .rejects.toThrow('Database connection failed');
+      await expect(controller.initializeSystemTemplates()).rejects.toThrow(
+        'Database connection failed',
+      );
     });
   });
 
@@ -521,7 +562,7 @@ describe('AnnouncementTemplatesController', () => {
       // This test verifies that the ParseUUIDPipe is properly applied
       // In a real scenario, invalid UUIDs would be rejected by the pipe
       const validUUID = '123e4567-e89b-12d3-a456-426614174000';
-      
+
       mockTemplateService.findTemplateById.mockResolvedValue({
         id: validUUID,
         name: 'Test Template',
@@ -529,7 +570,9 @@ describe('AnnouncementTemplatesController', () => {
 
       await controller.findTemplate(validUUID);
 
-      expect(mockTemplateService.findTemplateById).toHaveBeenCalledWith(validUUID);
+      expect(mockTemplateService.findTemplateById).toHaveBeenCalledWith(
+        validUUID,
+      );
     });
   });
 
@@ -548,17 +591,19 @@ describe('AnnouncementTemplatesController', () => {
       const serviceError = new Error('Database connection failed');
       mockTemplateService.createTemplate.mockRejectedValue(serviceError);
 
-      await expect(controller.createTemplate(createDto))
-        .rejects.toThrow('Database connection failed');
+      await expect(controller.createTemplate(createDto)).rejects.toThrow(
+        'Database connection failed',
+      );
     });
 
     it('should handle template service unavailability', async () => {
       mockTemplateService.findAllTemplates.mockRejectedValue(
-        new Error('Service unavailable')
+        new Error('Service unavailable'),
       );
 
-      await expect(controller.findAllTemplates({}))
-        .rejects.toThrow('Service unavailable');
+      await expect(controller.findAllTemplates({})).rejects.toThrow(
+        'Service unavailable',
+      );
     });
   });
 });

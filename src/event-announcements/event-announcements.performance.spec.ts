@@ -165,7 +165,13 @@ describe('Event Announcements Performance Tests', () => {
         { length: 20 },
         (_, i) => `announcement-${i}`,
       );
-      const actions = ['view', 'like', 'share', 'click', 'acknowledge'] as const;
+      const actions = [
+        'view',
+        'like',
+        'share',
+        'click',
+        'acknowledge',
+      ] as const;
 
       const startTime = Date.now();
 
@@ -174,7 +180,8 @@ describe('Event Announcements Performance Tests', () => {
         const randomUser = users[Math.floor(Math.random() * users.length)];
         const randomAnnouncement =
           announcements[Math.floor(Math.random() * announcements.length)];
-        const randomAction = actions[Math.floor(Math.random() * actions.length)];
+        const randomAction =
+          actions[Math.floor(Math.random() * actions.length)];
 
         return analyticsService.trackEngagement({
           userId: randomUser,
@@ -233,9 +240,7 @@ describe('Event Announcements Performance Tests', () => {
       expect(duration).toBeLessThan(2000); // Should complete within 2 seconds
       expect(results).toHaveLength(operationCount * 2);
 
-      console.log(
-        `${operationCount * 2} cache operations took ${duration}ms`,
-      );
+      console.log(`${operationCount * 2} cache operations took ${duration}ms`);
     });
 
     it('should handle large-scale template generation', async () => {
@@ -247,7 +252,8 @@ describe('Event Announcements Performance Tests', () => {
         id: 'template-123',
         name: 'Performance Test Template',
         titleTemplate: 'Event: {{eventName}} - {{eventDate}}',
-        contentTemplate: 'Join us for {{eventName}} on {{eventDate}} at {{location}}. {{description}}',
+        contentTemplate:
+          'Join us for {{eventName}} on {{eventDate}} at {{location}}. {{description}}',
         variables: {
           eventName: { type: 'string', required: true },
           eventDate: { type: 'string', required: true },
@@ -331,11 +337,15 @@ describe('Event Announcements Performance Tests', () => {
         addOrderBy: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValue([mockResults.data, mockResults.total]),
+        getManyAndCount: jest
+          .fn()
+          .mockResolvedValue([mockResults.data, mockResults.total]),
         getMany: jest.fn().mockResolvedValue(mockResults.data),
       };
 
-      mockAnnouncementRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      mockAnnouncementRepository.createQueryBuilder.mockReturnValue(
+        queryBuilder,
+      );
 
       const startTime = Date.now();
 
@@ -346,7 +356,10 @@ describe('Event Announcements Performance Tests', () => {
           limit: 20,
           search: `search term ${i}`,
           type: i % 2 === 0 ? AnnouncementType.EVENT : AnnouncementType.GENERAL,
-          priority: i % 3 === 0 ? AnnouncementPriority.HIGH : AnnouncementPriority.NORMAL,
+          priority:
+            i % 3 === 0
+              ? AnnouncementPriority.HIGH
+              : AnnouncementPriority.NORMAL,
           isPublished: true,
           tags: [`tag${i % 5}`, `tag${(i + 1) % 5}`],
           publishedAfter: new Date('2024-01-01'),
@@ -534,15 +547,13 @@ describe('Event Announcements Performance Tests', () => {
         concurrentUpdates,
       );
 
-      console.log(
-        `${concurrentUpdates} concurrent updates took ${duration}ms`,
-      );
+      console.log(`${concurrentUpdates} concurrent updates took ${duration}ms`);
     });
 
     it('should handle concurrent notification broadcasting', async () => {
       const notificationCount = 100;
       const targetAudiences = [['all'], ['students'], ['faculty'], ['staff']];
-      
+
       // Create mock announcement for notifications
       const mockAnnouncement = {
         id: 'notification-test',
@@ -571,8 +582,7 @@ describe('Event Announcements Performance Tests', () => {
       const notificationPromises = Array.from(
         { length: notificationCount },
         (_, i) => {
-          const targetAudience =
-            targetAudiences[i % targetAudiences.length];
+          const targetAudience = targetAudiences[i % targetAudiences.length];
           return notificationService.notifyUsers({
             type: 'new_announcement',
             announcement: mockAnnouncement,
@@ -609,17 +619,23 @@ describe('Event Announcements Performance Tests', () => {
         const interval = setInterval(async () => {
           // Mix of operations
           const operations = [
-            () => cacheService.set(`load-test-${operationCount}`, { data: operationCount }),
-            () => cacheService.get(`load-test-${Math.floor(operationCount / 2)}`),
-            () => analyticsService.trackEngagement({
-              userId: `user-${operationCount % 10}`,
-              announcementId: `announcement-${operationCount % 5}`,
-              action: 'view',
-              timestamp: new Date(),
-            }),
+            () =>
+              cacheService.set(`load-test-${operationCount}`, {
+                data: operationCount,
+              }),
+            () =>
+              cacheService.get(`load-test-${Math.floor(operationCount / 2)}`),
+            () =>
+              analyticsService.trackEngagement({
+                userId: `user-${operationCount % 10}`,
+                announcementId: `announcement-${operationCount % 5}`,
+                action: 'view',
+                timestamp: new Date(),
+              }),
           ];
 
-          const randomOperation = operations[operationCount % operations.length];
+          const randomOperation =
+            operations[operationCount % operations.length];
           await randomOperation();
           operationCount++;
 

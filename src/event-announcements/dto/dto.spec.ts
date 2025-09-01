@@ -14,7 +14,8 @@ describe('Event Announcements DTOs', () => {
     it('should validate a valid announcement DTO', async () => {
       const validDto = {
         title: 'Valid Test Announcement',
-        content: 'This is a valid announcement content with sufficient length to pass validation requirements.',
+        content:
+          'This is a valid announcement content with sufficient length to pass validation requirements.',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         status: AnnouncementStatus.PUBLISHED,
@@ -44,8 +45,8 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors.length).toBeGreaterThan(0);
-      
-      const errorProperties = errors.map(error => error.property);
+
+      const errorProperties = errors.map((error) => error.property);
       expect(errorProperties).toContain('title');
       expect(errorProperties).toContain('content');
       expect(errorProperties).toContain('createdBy');
@@ -54,7 +55,8 @@ describe('Event Announcements DTOs', () => {
     it('should fail validation for title too long', async () => {
       const invalidDto = {
         title: 'a'.repeat(256), // Exceeds 255 character limit
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
       };
 
@@ -62,7 +64,7 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors.length).toBeGreaterThan(0);
-      const titleError = errors.find(error => error.property === 'title');
+      const titleError = errors.find((error) => error.property === 'title');
       expect(titleError).toBeDefined();
       expect(titleError?.constraints).toHaveProperty('maxLength');
     });
@@ -78,7 +80,7 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors.length).toBeGreaterThan(0);
-      const contentError = errors.find(error => error.property === 'content');
+      const contentError = errors.find((error) => error.property === 'content');
       expect(contentError).toBeDefined();
       expect(contentError?.constraints).toHaveProperty('maxLength');
     });
@@ -86,7 +88,8 @@ describe('Event Announcements DTOs', () => {
     it('should fail validation for invalid UUID in createdBy', async () => {
       const invalidDto = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: 'invalid-uuid',
       };
 
@@ -94,7 +97,9 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors.length).toBeGreaterThan(0);
-      const createdByError = errors.find(error => error.property === 'createdBy');
+      const createdByError = errors.find(
+        (error) => error.property === 'createdBy',
+      );
       expect(createdByError).toBeDefined();
       expect(createdByError?.constraints).toHaveProperty('isUuid');
     });
@@ -102,7 +107,8 @@ describe('Event Announcements DTOs', () => {
     it('should fail validation for invalid URL fields', async () => {
       const invalidDto = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         eventUrl: 'not-a-valid-url',
         registrationUrl: 'also-not-valid',
@@ -113,13 +119,13 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors.length).toBeGreaterThan(0);
-      
-      const urlErrors = errors.filter(error => 
-        ['eventUrl', 'registrationUrl', 'imageUrl'].includes(error.property)
+
+      const urlErrors = errors.filter((error) =>
+        ['eventUrl', 'registrationUrl', 'imageUrl'].includes(error.property),
       );
       expect(urlErrors.length).toBeGreaterThan(0);
-      
-      urlErrors.forEach(error => {
+
+      urlErrors.forEach((error) => {
         expect(error.constraints).toHaveProperty('isUrl');
       });
     });
@@ -127,7 +133,8 @@ describe('Event Announcements DTOs', () => {
     it('should validate enum fields correctly', async () => {
       const validDto = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         type: AnnouncementType.EVENT,
         priority: AnnouncementPriority.HIGH,
@@ -146,7 +153,8 @@ describe('Event Announcements DTOs', () => {
     it('should fail validation for invalid enum values', async () => {
       const invalidDto = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         type: 'INVALID_TYPE',
         priority: 'INVALID_PRIORITY',
@@ -157,13 +165,13 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors.length).toBeGreaterThan(0);
-      
-      const enumErrors = errors.filter(error => 
-        ['type', 'priority', 'status'].includes(error.property)
+
+      const enumErrors = errors.filter((error) =>
+        ['type', 'priority', 'status'].includes(error.property),
       );
       expect(enumErrors.length).toBe(3);
-      
-      enumErrors.forEach(error => {
+
+      enumErrors.forEach((error) => {
         expect(error.constraints).toHaveProperty('isEnum');
       });
     });
@@ -171,7 +179,8 @@ describe('Event Announcements DTOs', () => {
     it('should validate array fields correctly', async () => {
       const validDto = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         targetAudience: ['all', 'students', 'faculty'],
         tags: ['important', 'urgent', 'notification'],
@@ -190,7 +199,8 @@ describe('Event Announcements DTOs', () => {
     it('should validate date transformation correctly', async () => {
       const validDto = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         eventDate: '2024-12-25T10:00:00Z',
         startDate: '2024-12-25T09:00:00Z',
@@ -211,7 +221,8 @@ describe('Event Announcements DTOs', () => {
     it('should validate numeric fields correctly', async () => {
       const validDto = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         maxParticipants: 100,
       };
@@ -226,7 +237,8 @@ describe('Event Announcements DTOs', () => {
     it('should fail validation for negative maxParticipants', async () => {
       const invalidDto = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         maxParticipants: -1,
       };
@@ -235,7 +247,9 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors.length).toBeGreaterThan(0);
-      const maxParticipantsError = errors.find(error => error.property === 'maxParticipants');
+      const maxParticipantsError = errors.find(
+        (error) => error.property === 'maxParticipants',
+      );
       expect(maxParticipantsError).toBeDefined();
       expect(maxParticipantsError?.constraints).toHaveProperty('min');
     });
@@ -245,7 +259,8 @@ describe('Event Announcements DTOs', () => {
     it('should validate a valid update DTO', async () => {
       const validDto = {
         title: 'Updated Title',
-        content: 'Updated content with sufficient length to pass validation requirements.',
+        content:
+          'Updated content with sufficient length to pass validation requirements.',
         priority: AnnouncementPriority.HIGH,
         isFeatured: true,
       };
@@ -283,11 +298,11 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors.length).toBeGreaterThan(0);
-      
-      const titleError = errors.find(error => error.property === 'title');
-      const contentError = errors.find(error => error.property === 'content');
-      const urlError = errors.find(error => error.property === 'eventUrl');
-      
+
+      const titleError = errors.find((error) => error.property === 'title');
+      const contentError = errors.find((error) => error.property === 'content');
+      const urlError = errors.find((error) => error.property === 'eventUrl');
+
       expect(titleError?.constraints).toHaveProperty('maxLength');
       expect(contentError?.constraints).toHaveProperty('maxLength');
       expect(urlError?.constraints).toHaveProperty('isUrl');
@@ -338,9 +353,9 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       if (errors.length > 0) {
-        const pageError = errors.find(error => error.property === 'page');
-        const limitError = errors.find(error => error.property === 'limit');
-        
+        const pageError = errors.find((error) => error.property === 'page');
+        const limitError = errors.find((error) => error.property === 'limit');
+
         if (pageError) {
           expect(pageError.constraints).toHaveProperty('min');
         }
@@ -392,11 +407,11 @@ describe('Event Announcements DTOs', () => {
       const errors = await validate(dto);
 
       if (errors.length > 0) {
-        const enumErrors = errors.filter(error => 
-          ['type', 'priority', 'status'].includes(error.property)
+        const enumErrors = errors.filter((error) =>
+          ['type', 'priority', 'status'].includes(error.property),
         );
-        
-        enumErrors.forEach(error => {
+
+        enumErrors.forEach((error) => {
           expect(error.constraints).toHaveProperty('isEnum');
         });
       }
@@ -407,7 +422,8 @@ describe('Event Announcements DTOs', () => {
     it('should handle empty strings vs undefined for optional fields', async () => {
       const dtoWithEmptyStrings = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         summary: '', // Empty string
         category: '', // Empty string
@@ -424,7 +440,8 @@ describe('Event Announcements DTOs', () => {
     it('should validate complex nested data structures', async () => {
       const complexDto = {
         title: 'Complex Event Announcement',
-        content: 'This is a complex event announcement with multiple data types and validation rules to test.',
+        content:
+          'This is a complex event announcement with multiple data types and validation rules to test.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         type: AnnouncementType.EVENT,
         priority: AnnouncementPriority.HIGH,
@@ -454,14 +471,18 @@ describe('Event Announcements DTOs', () => {
     it('should validate boolean field type coercion', async () => {
       const dtoWithStringBooleans = {
         title: 'Valid Title',
-        content: 'Valid content with sufficient length to pass validation requirements.',
+        content:
+          'Valid content with sufficient length to pass validation requirements.',
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
         isPublished: 'true', // String instead of boolean
         isPinned: 'false', // String instead of boolean
         isFeatured: '1', // Number-like string
       };
 
-      const dto = plainToClass(CreateEventAnnouncementDto, dtoWithStringBooleans);
+      const dto = plainToClass(
+        CreateEventAnnouncementDto,
+        dtoWithStringBooleans,
+      );
       const errors = await validate(dto);
 
       // Depending on class-transformer configuration, this might pass or fail
@@ -472,8 +493,8 @@ describe('Event Announcements DTOs', () => {
         expect(typeof dto.isPinned).toBe('boolean');
       } else {
         // If transformation failed, should have boolean validation errors
-        const booleanErrors = errors.filter(error => 
-          ['isPublished', 'isPinned', 'isFeatured'].includes(error.property)
+        const booleanErrors = errors.filter((error) =>
+          ['isPublished', 'isPinned', 'isFeatured'].includes(error.property),
         );
         expect(booleanErrors.length).toBeGreaterThan(0);
       }
