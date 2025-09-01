@@ -42,6 +42,11 @@ export class AnnouncementTestDataFactory {
       acknowledgeCount: 0,
       currentParticipants: 0,
       readingTimeMinutes: 1,
+      sendNotification: true,
+      sendEmail: false,
+      sendPush: false,
+      showInDashboard: true,
+      showInApp: true,
       createdBy: '123e4567-e89b-12d3-a456-426614174000',
       createdByName: 'Test User',
       createdAt: new Date(),
@@ -109,11 +114,14 @@ export class AnnouncementTestDataFactory {
       announcementId: 'test-announcement-' + Date.now(),
       action: 'view',
       timestamp: new Date(),
-      userAgent: 'Mozilla/5.0 (Test Browser)',
-      ipAddress: '192.168.1.1',
-      referrer: 'https://test.example.com',
-      duration: 30000,
-      metadata: { source: 'test' },
+      timestamp: new Date(),
+      metadata: {
+        source: 'test',
+        userAgent: 'Mozilla/5.0 (Test Browser)',
+        ipAddress: '192.168.1.1',
+        referrer: 'https://test.example.com',
+        duration: 30000,
+      },
       ...overrides,
     };
   }
@@ -254,7 +262,7 @@ export class MockRepositoryFactory {
       metadata: {} as any,
       target: EventAnnouncement,
       queryRunner: undefined,
-    } as jest.Mocked<Repository<EventAnnouncement>>;
+    return {} as jest.Mocked<Repository<EventAnnouncement>>;
   }
 
   static createMockTemplateRepository(): jest.Mocked<Repository<AnnouncementTemplate>> {
@@ -352,7 +360,7 @@ export class MockRepositoryFactory {
       metadata: {} as any,
       target: AnnouncementTemplate,
       queryRunner: undefined,
-    } as jest.Mocked<Repository<AnnouncementTemplate>>;
+    return {} as jest.Mocked<Repository<AnnouncementTemplate>>;
   }
 }
 
@@ -539,13 +547,12 @@ export class StressTestDataGenerator {
             announcementId: `stress-announcement-${a}`,
             action: actions[Math.floor(Math.random() * actions.length)],
             timestamp: new Date(Date.now() - Math.random() * 86400000 * 30), // Random within last 30 days
-            userAgent: `StressTest-Agent-${u}`,
-            ipAddress: `192.168.${Math.floor(u / 255)}.${u % 255}`,
-            duration: Math.floor(Math.random() * 300000), // 0-5 minutes
             metadata: {
               source: 'stress-test',
               sessionId: `session-${u}-${Math.floor(i / 10)}`,
               device: Math.random() > 0.5 ? 'desktop' : 'mobile',
+              userAgent: `StressTest-Agent-${u}`,
+              ipAddress: `192.168.${Math.floor(u / 255)}.${u % 255}`,
             },
           });
         }

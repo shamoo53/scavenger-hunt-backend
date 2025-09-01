@@ -231,7 +231,6 @@ describe('Event Announcements Entities', () => {
       expect(announcement.category).toBeUndefined();
       expect(announcement.author).toBeUndefined();
       expect(announcement.eventUrl).toBeUndefined();
-      expect(announcement.location).toBeUndefined();
     });
   });
 

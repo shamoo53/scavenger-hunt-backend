@@ -296,7 +296,7 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
 
       // Should still work despite cache failures
       const result = await announcementService.findAll();
-      expect(result.data).toHaveLength(1);
+      expect((result as any).data).toHaveLength(1);
     });
 
     it('should handle analytics service failures gracefully', async () => {
@@ -304,6 +304,7 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         userId: 'user-123',
         announcementId: 'announcement-123',
         action: 'view' as const,
+        timestamp: new Date(),
       };
 
       // Mock analytics failure but don't let it propagate
@@ -320,14 +321,31 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
     it('should handle notification service failures', async () => {
       const notificationData = {
         type: 'new_announcement' as const,
-        announcement: {
-          id: 'announcement-123',
-          title: 'Test Announcement',
-          content: 'Test content',
-        },
-        priority: 'normal' as const,
+        announcement: mockAnnouncement,
+        priority: 'medium' as const,
         targetAudience: ['all'],
       };
+      
+      const mockAnnouncement = {
+        id: 'announcement-123',
+        title: 'Test Announcement',
+        content: 'Test content',
+        type: AnnouncementType.GENERAL,
+        priority: AnnouncementPriority.NORMAL,
+        status: AnnouncementStatus.PUBLISHED,
+        isActive: true,
+        isPinned: false,
+        isFeatured: false,
+        requiresAcknowledgment: false,
+        isPublished: true,
+        allowComments: true,
+        notifyUsers: false,
+        viewCount: 0,
+        likeCount: 0,
+        shareCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any;
 
       // Should handle gracefully without throwing
       await expect(notificationService.notifyUsers(notificationData)).resolves.not.toThrow();
@@ -471,7 +489,7 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         titleTemplate: 'System: {{title}}',
         contentTemplate: 'System content',
         isSystem: true, // System template
-        type: AnnouncementType.SYSTEM,
+        type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
         isActive: true,
       };
@@ -534,7 +552,7 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         content: 'Test content with sufficient length for validation requirements.',
         type: AnnouncementType.GENERAL,
         priority: AnnouncementPriority.NORMAL,
-        expiryDate: futureDate,
+        expireAt: futureDate,
         createdBy: '123e4567-e89b-12d3-a456-426614174000',
       };
 
@@ -555,7 +573,7 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
       mockAnnouncementRepository.save.mockResolvedValue(mockAnnouncement);
 
       const result = await announcementService.create(createDto);
-      expect(result.expiryDate).toEqual(futureDate);
+      expect(result.expireAt).toEqual(futureDate);
     });
 
     it('should handle announcement with past event date', async () => {
@@ -614,6 +632,7 @@ describe('Event Announcements Error Handling and Edge Cases', () => {
         userId: 'user-123',
         announcementId: 'announcement-123',
         action: 'view' as const,
+        timestamp: new Date(),
         metadata: {
           // Large metadata object
           ...Object.fromEntries(

@@ -254,6 +254,28 @@ describe('EventAnnouncementsModule Integration Tests', () => {
 
   describe('Service Integration Tests', () => {
     it('should integrate cache, analytics, and notification services', async () => {
+      // Define mock announcement for notification service
+      const mockAnnouncement = {
+        id: 'announcement-123',
+        title: 'Test Announcement',
+        content: 'Test content',
+        type: AnnouncementType.GENERAL,
+        priority: AnnouncementPriority.NORMAL,
+        status: AnnouncementStatus.PUBLISHED,
+        isActive: true,
+        isPinned: false,
+        isFeatured: false,
+        requiresAcknowledgment: false,
+        isPublished: true,
+        allowComments: true,
+        notifyUsers: false,
+        viewCount: 0,
+        likeCount: 0,
+        shareCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any;
+      
       // Test cache integration
       const cacheKey = 'test-key';
       const testData = { message: 'cached data' };
@@ -276,7 +298,7 @@ describe('EventAnnouncementsModule Integration Tests', () => {
       const notificationData = {
         type: 'new_announcement' as const,
         announcement: mockAnnouncement,
-        priority: 'normal' as const,
+        priority: 'medium' as const,
         targetAudience: ['all'],
       };
 

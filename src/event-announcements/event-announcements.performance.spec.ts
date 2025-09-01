@@ -332,6 +332,7 @@ describe('Event Announcements Performance Tests', () => {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
         getManyAndCount: jest.fn().mockResolvedValue([mockResults.data, mockResults.total]),
+        getMany: jest.fn().mockResolvedValue(mockResults.data),
       };
 
       mockAnnouncementRepository.createQueryBuilder.mockReturnValue(queryBuilder);
@@ -438,6 +439,7 @@ describe('Event Announcements Performance Tests', () => {
               userId: `user-${cycle}-${i}`,
               announcementId: `announcement-${cycle}-${i}`,
               action: 'view',
+              timestamp: new Date(),
             }),
           ),
         );
@@ -540,6 +542,28 @@ describe('Event Announcements Performance Tests', () => {
     it('should handle concurrent notification broadcasting', async () => {
       const notificationCount = 100;
       const targetAudiences = [['all'], ['students'], ['faculty'], ['staff']];
+      
+      // Create mock announcement for notifications
+      const mockAnnouncement = {
+        id: 'notification-test',
+        title: 'Notification Test',
+        content: 'Test content',
+        type: AnnouncementType.GENERAL,
+        priority: AnnouncementPriority.NORMAL,
+        status: AnnouncementStatus.PUBLISHED,
+        isActive: true,
+        isPinned: false,
+        isFeatured: false,
+        requiresAcknowledgment: false,
+        isPublished: true,
+        allowComments: true,
+        notifyUsers: false,
+        viewCount: 0,
+        likeCount: 0,
+        shareCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any;
 
       const startTime = Date.now();
 
@@ -551,12 +575,8 @@ describe('Event Announcements Performance Tests', () => {
             targetAudiences[i % targetAudiences.length];
           return notificationService.notifyUsers({
             type: 'new_announcement',
-            announcement: {
-              id: `announcement-${i}`,
-              title: `Concurrent Test ${i}`,
-              content: `Content ${i}`,
-            },
-            priority: 'normal',
+            announcement: mockAnnouncement,
+            priority: 'medium',
             targetAudience,
           });
         },
@@ -595,6 +615,7 @@ describe('Event Announcements Performance Tests', () => {
               userId: `user-${operationCount % 10}`,
               announcementId: `announcement-${operationCount % 5}`,
               action: 'view',
+              timestamp: new Date(),
             }),
           ];
 
