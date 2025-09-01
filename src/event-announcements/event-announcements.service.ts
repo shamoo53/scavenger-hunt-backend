@@ -25,6 +25,9 @@ import {
   AnnouncementPriority,
   AnnouncementStatus,
 } from './enums/announcement.enum';
+import { AnnouncementCacheService } from './services/cache.service';
+import { AnnouncementAnalyticsService } from './services/analytics.service';
+import { AnnouncementNotificationService } from './services/notification.service';
 
 @Injectable()
 export class EventAnnouncementsService {
@@ -33,6 +36,9 @@ export class EventAnnouncementsService {
   constructor(
     @InjectRepository(EventAnnouncement)
     private readonly announcementRepository: Repository<EventAnnouncement>,
+    private readonly cacheService: AnnouncementCacheService,
+    private readonly analyticsService: AnnouncementAnalyticsService,
+    private readonly notificationService: AnnouncementNotificationService,
   ) {}
 
   async create(
@@ -74,6 +80,19 @@ export class EventAnnouncementsService {
       const savedAnnouncement =
         await this.announcementRepository.save(announcement);
 
+      // Invalidate related cache
+      this.cacheService.invalidateAnnouncementCache();
+
+      // Send notifications if announcement is published
+      if (savedAnnouncement.isPublished) {
+        await this.notificationService.notifyUsers({
+          type: 'new_announcement',
+          announcement: savedAnnouncement,
+          priority: this.mapPriorityToNotificationPriority(savedAnnouncement.priority),
+          targetAudience: savedAnnouncement.targetAudience
+        });
+      }
+
       this.logger.log(
         `Created announcement: ${savedAnnouncement.id} - ${savedAnnouncement.title}`,
       );
@@ -89,6 +108,15 @@ export class EventAnnouncementsService {
 
   async findAll(queryDto: QueryEventAnnouncementDto = {}) {
     try {
+      // Generate cache key for this query
+      const cacheKey = this.cacheService.generateKey('findAll', JSON.stringify(queryDto));
+      
+      // Try to get cached result
+      const cached = this.cacheService.get(cacheKey);
+      if (cached) {
+        return cached;
+      }
+
       const {
         page = 1,
         limit = 10,
@@ -270,7 +298,7 @@ export class EventAnnouncementsService {
 
       const [data, total] = await queryBuilder.getManyAndCount();
 
-      return {
+      const result = {
         data,
         total,
         page,
@@ -279,6 +307,11 @@ export class EventAnnouncementsService {
         hasNext: page * limit < total,
         hasPrevious: page > 1,
       };
+
+      // Cache the result
+      this.cacheService.set(cacheKey, result, 180); // Cache for 3 minutes
+
+      return result;
     } catch (error) {
       this.logger.error(
         `Failed to find announcements: ${error.message}`,
@@ -599,9 +632,22 @@ export class EventAnnouncementsService {
   }
 
   // Engagement tracking methods
-  async incrementViewCount(id: string): Promise<void> {
+  async incrementViewCount(id: string, userId?: string): Promise<void> {
     try {
       await this.announcementRepository.increment({ id }, 'viewCount', 1);
+      
+      // Track analytics if userId provided
+      if (userId) {
+        await this.analyticsService.trackEngagement({
+          userId,
+          announcementId: id,
+          action: 'view',
+          timestamp: new Date()
+        });
+      }
+      
+      // Invalidate cache for this announcement
+      this.cacheService.clearByPattern(`announcement:${id}`);
     } catch (error) {
       this.logger.warn(
         `Failed to increment view count for announcement ${id}: ${error.message}`,
@@ -937,6 +983,23 @@ export class EventAnnouncementsService {
 
     if (existing) {
       throw new BadRequestException('Slug already exists');
+    }
+  }
+
+  private mapPriorityToNotificationPriority(
+    priority: AnnouncementPriority
+  ): 'low' | 'medium' | 'high' | 'urgent' {
+    switch (priority) {
+      case AnnouncementPriority.LOW:
+        return 'low';
+      case AnnouncementPriority.NORMAL:
+        return 'medium';
+      case AnnouncementPriority.HIGH:
+        return 'high';
+      case AnnouncementPriority.URGENT:
+        return 'urgent';
+      default:
+        return 'medium';
     }
   }
 }
